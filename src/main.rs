@@ -110,8 +110,7 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// Process a Build Target:
-/// ====================================================================================
+/// Process a Build Target like:
 /// Configuration/Tool: freedom-kl25z/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 /// 2024-10-30 00:43:37
 /// ------------------------------------------------------------------------------------
@@ -121,9 +120,9 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
 ///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
-/// ====================================================================================
 async fn process_target(target: &[&str], linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", target[0]);
+    println!("{}", target.last().unwrap());
     sleep(Duration::from_secs(5));
     Ok(())
 }
