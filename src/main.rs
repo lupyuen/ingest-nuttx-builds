@@ -182,11 +182,12 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
 // cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/nuttxpr/instance/ox64:nsh
 // # TYPE build_score gauge
 // # HELP build_score 1.0 for successful build, 0.0 for failed build
-// build_score{ url="http://aaa", msg="warning: aaa" } 0.5
+// build_score{ version=1, user="nuttxpr", group="risc-v-01", board="ox64", config="nsh", target="ox64:nsh", url="http://aaa", msg="warning: aaa" } 0.5
 // EOF
 async fn post_to_pushgateway() -> Result<(), Box<dyn std::error::Error>> {
     let version = 1;
 
+    // TODO: url_display
     sleep(Duration::from_secs(5));
     Ok(())
 }
