@@ -214,10 +214,19 @@ async fn post_to_pushgateway(
     url: &str,
     msg: &Vec<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    // Get the Board and Config
     let version = 1;
     let target_split = target.split(":").collect::<Vec<_>>();
     let board = target_split[0];
     let config = target_split[1];
+
+    // If `group` is "risc-v-01": `arch` becomes "risc-v"
+    // If `group` is "other": `arch` becomes "other"
+    let arch =
+        if let Some(pos) = group.rfind("-") { &group[0..pos] }
+        else { group };
+
+    // Join the messages
     let msg_join = msg
         .join(" \\n ")
         .replace("\"", "\\\"");
@@ -231,7 +240,7 @@ async fn post_to_pushgateway(
 r##"
 # TYPE build_score gauge
 # HELP build_score 1.0 for successful build, 0.0 for failed build
-build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt} }} {build_score}
+build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch="{arch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt} }} {build_score}
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
