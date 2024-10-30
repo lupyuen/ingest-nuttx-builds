@@ -11,7 +11,7 @@ use std::{
     time::Duration
 };
 use clap::Parser;
-use env_logger::Target;
+use env_logger::{fmt::Timestamp, Target};
 use log::info;
 use regex::Regex;
 
@@ -124,19 +124,46 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
 async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
+    let mut l = 0;
+    if lines[l].starts_with("Cmake in present:") { l += 1; }
 
-    // Find the Target Name
+    // Extract the Target Name "freedom-kl25z/nsh" from:
+    // Configuration/Tool: freedom-kl25z/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
     let re = Regex::new("^Configuration/Tool: ([^,]+)").unwrap();
-    let caps = re.captures(lines[0]);
+    let caps = re.captures(lines[l]);
     if caps.is_none() {
-        println!("Not a target: {}", lines[0]);
+        println!("*** Not a target: {}", lines[l]);
         return Ok(())
     }
-    let target = caps.unwrap()  // "freedom-kl25z/nsh"
+    let target = caps.unwrap()
         .get(1).unwrap()
-        .as_str();
-    let target = target.replace("/", ":");  // "freedom-kl25z:nsh"
+        .as_str()  // "freedom-kl25z/nsh"
+        .replace("/", ":");  // "freedom-kl25z:nsh"
     println!("target={target}");
+    l += 1;
+
+    // Read the Timestamp
+    let timestamp = lines[l]
+        .replace(" ", "T");
+    println!("timestamp={timestamp}");
+    l += 1;
+
+    // To Identify Errors / Warnings: Skip the known lines
+    let lines = &lines[l..];
+    for line in lines {
+        let line = line.trim();
+        if line.starts_with("----------") ||
+            line.starts_with("Cleaning") ||
+            line.starts_with("Configuring") ||
+            line.starts_with("Select") ||
+            line.starts_with("Disabling") ||
+            line.starts_with("Enabling") ||
+            line.starts_with("Building") ||
+            line.starts_with("Normalize") {
+                continue;
+            }
+            println!("*** Error / Warning: {line}");
+    }
     sleep(Duration::from_secs(5));
     Ok(())
 }
