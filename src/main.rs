@@ -1,8 +1,7 @@
-//! Fetch the Latest 20 PRs:
-//!   If PR Status = Open
-//!   And PR Comments don't exist:
-//!     Then Call Gemini API to Validate the PR
-//!     And Post Gemini Response as PR Comment
+//! Fetch the Latest Gists by User
+//! Process the Build Log
+//! Process each Build Target
+//! Post to Prometheus Pushgateway
 
 use std::{
     thread::sleep, 
@@ -43,7 +42,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Process Every Gist
-    println!("id | url | description");
     for mut gist in gists {
         let id = gist.id;  // "6e5150f02e081be935fa525e6546cb2b"
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
@@ -56,7 +54,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let target_group = filename
             .replace("ci-", "")
             .replace(".log", "");  // "arm-04"
-        println!("{id} | {url} | {description}");
+
+        if !filename.starts_with("ci-") {
+            println!("*** Not A Build Log: {url}");
+            continue;
+        }
+        println!("id={id} | url={url} | description={description}");
         println!("target_group={target_group:?}");
         println!("filename={filename:?}");
         println!("raw_url={raw_url:?}");
@@ -166,7 +169,7 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
             line.starts_with("Normalize") {
                 continue;
             }
-            println!("*** Error / Warning: {line}");
+            println!("*** Msg: {line}");
             msg.push(line);
     }
 
