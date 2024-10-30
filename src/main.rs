@@ -5,14 +5,11 @@
 //!     And Post Gemini Response as PR Comment
 
 use std::{
-    env, 
-    io::Read,
     thread::sleep, 
-    time::Duration
+    time::Duration,
+    vec,
 };
 use clap::Parser;
-use env_logger::{fmt::Timestamp, Target};
-use log::info;
 use regex::Regex;
 
 /// Command-Line Arguments
@@ -37,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .personal_token(token)
         .build()?;
 
-    // Fetch the Latest Gists
+    // Fetch the Latest Gists, reverse chronological order
     let gists = octocrab
         .gists()
         .list_user_gists(&args.user)
@@ -51,14 +48,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let id = gist.id;  // "6e5150f02e081be935fa525e6546cb2b"
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
         let file = gist.files.first_entry().unwrap();
-        let filename = file.get().filename.as_str();
-        let raw_url = file.get().raw_url.as_str();
-        let description = gist  // "[arm-04] CI Log for nuttx @ f6facf7602003071aaabc6dd00082b7ebb2f5ab9 / nuttx-apps @ d9e178aad022030224d1c95628cab1784a13a339"
+        let filename = file.get().filename.as_str();  // "ci-arm-04.log"
+        let raw_url = file.get().raw_url.as_str();  // "https://gist.githubusercontent.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b/raw/9f07185404c0f81914f622c0152a980022539968/ci-arm-04.log"
+        let description = gist
             .description
-            .unwrap_or("<No description>".into());
+            .unwrap_or("<No description>".into());  // "[arm-04] CI Log for nuttx @ f6facf7602003071aaabc6dd00082b7ebb2f5ab9 / nuttx-apps @ d9e178aad022030224d1c95628cab1784a13a339"
+        let target_group = filename
+            .replace("ci-", "")
+            .replace(".log", "");  // "arm-04"
         println!("{id} | {url} | {description}");
-        println!("filename={filename:?}");  // "ci-arm-04.log"
+        println!("target_group={target_group:?}");
+        println!("filename={filename:?}");
         println!("raw_url={raw_url:?}");
+
+        // TODO: Skip the filenames we've seen before
 
         // TODO: Compose the Line URL
         // https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b#file-ci-arm-04-log-L140
@@ -95,11 +98,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// ====================================================================================
 async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
     // Look for the delimiter
-    const delimiter: &str = "==========";
+    const DELIMITER: &str = "==========";
     let mut target_linenum: Option<usize> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
     for (linenum, line) in lines.into_iter().enumerate() {
-        if line.starts_with(delimiter) {
+        if line.starts_with(DELIMITER) {
             // Process the target
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
@@ -149,6 +152,7 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
     l += 1;
 
     // To Identify Errors / Warnings: Skip the known lines
+    let mut msg: Vec<&str> = vec![];
     let lines = &lines[l..];
     for line in lines {
         let line = line.trim();
@@ -163,7 +167,12 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
                 continue;
             }
             println!("*** Error / Warning: {line}");
+            msg.push(line);
     }
+
+    // Post the Target to Prometheus Pushgateway
+    let version = 1;
+
     sleep(Duration::from_secs(5));
     Ok(())
 }
