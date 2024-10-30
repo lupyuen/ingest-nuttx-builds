@@ -45,6 +45,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for mut gist in gists {
         let id = gist.id;  // "6e5150f02e081be935fa525e6546cb2b"
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
+        if gist.files.first_entry().is_none() {            
+            println!("*** No Files: {url}");
+            continue;
+        }
         let file = gist.files.first_entry().unwrap();
         let filename = file.get().filename.as_str();  // "ci-arm-04.log"
         let raw_url = file.get().raw_url.as_str();  // "https://gist.githubusercontent.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b/raw/9f07185404c0f81914f622c0152a980022539968/ci-arm-04.log"
@@ -77,7 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         process_log(&body, &args.user, &target_group, &url.as_str(), &filename).await?;
 
         // Wait a while
-        sleep(Duration::from_secs(5));
+        sleep(Duration::from_secs(1));
     }
 
     // Return OK
@@ -254,6 +258,5 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
     if !res.status().is_success() {
         println!("*** Pushgateway Failed");
     }
-    sleep(Duration::from_secs(5));
     Ok(())
 }

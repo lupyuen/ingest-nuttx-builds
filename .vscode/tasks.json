@@ -7,7 +7,7 @@
             "label": "Build",
             "type": "shell",
 
-            "command": ". $HOME/github-token.sh && cargo run -- --user jerpelea ## nuttxpr",
+            "command": ". $HOME/github-token.sh && cargo run -- --user nuttxpr ## jerpelea ## ",
 
             "problemMatcher": "$rustc",
             "group": {
