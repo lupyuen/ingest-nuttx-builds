@@ -66,9 +66,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // TODO: Skip the filenames we've seen before
 
-        // TODO: Compose the Line URL
-        // https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b#file-ci-arm-04-log-L140
-
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
         // println!("Status: {}", res.status());
@@ -77,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // println!("Body:\n{}", body);
 
         // Process the Build Log
-        process_log(&body).await?;
+        process_log(&body, &args.user, &target_group, &url.as_str(), &filename).await?;
 
         // Wait a while
         sleep(Duration::from_secs(5));
@@ -99,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
 /// ====================================================================================
-async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
+async fn process_log(log: &str, user: &str, group: &str, url: &str, filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     // Look for the delimiter
     const DELIMITER: &str = "==========";
     let mut target_linenum: Option<usize> = None;
@@ -109,7 +106,7 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
             // Process the target
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
-                process_target(target, l).await?;
+                process_target(target, user, group, url, filename, l).await?;
             }
             target_linenum = Some(linenum + 1);
         }
@@ -127,7 +124,7 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
 ///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
-async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
+async fn process_target(lines: &[&str], user: &str, group: &str, url: &str, filename: &str, linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
     let mut l = 0;
@@ -173,10 +170,32 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
             msg.push(line);
     }
 
-    // TODO: Compute the Build Score
+    // Compute the Build Score based on Error vs Warning
+    let contains_error = msg.join(" ").to_lowercase().contains("error");
+    let contains_warning = msg.join(" ").to_lowercase().contains("warning");
+    let build_score =
+        if msg.is_empty() { 1.0 }
+        else if contains_error { 0.0 }
+        else if contains_warning { 0.5 }
+        else { 0.8 };
+
+    // Compose the Line URL: https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b#file-ci-arm-04-log-L140
+    // Based on `url``: https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b
+    // And `filename``: ci-arm-04.log
+    let filename2 = filename.replace(".", "-");
+    let linenum2 = linenum + l - 1;
+    let url = format!("{url}#file-{filename2}-L{linenum2}");
 
     // Post the Target to Prometheus Pushgateway
-    post_to_pushgateway().await?;
+    post_to_pushgateway(
+        build_score,
+        &timestamp,
+        user,
+        group,
+        &target,
+        &url,
+        &msg
+    ).await?;
     Ok(())
 }
 
@@ -186,10 +205,46 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
 // # HELP build_score 1.0 for successful build, 0.0 for failed build
 // build_score{ version=1, user="nuttxpr", group="risc-v-01", board="ox64", config="nsh", target="ox64:nsh", url="http://aaa", msg="warning: aaa" } 0.5
 // EOF
-async fn post_to_pushgateway() -> Result<(), Box<dyn std::error::Error>> {
+async fn post_to_pushgateway(
+    build_score: f32,
+    timestamp: &str,
+    user: &str,
+    group: &str,
+    target: &str,
+    url: &str,
+    msg: &Vec<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let version = 1;
-
-    // TODO: url_display
+    let target_split = target.split(":").collect::<Vec<_>>();
+    let board = target_split[0];
+    let config = target_split[1];
+    let msg_join = msg
+        .join(" \\n ")
+        .replace("\"", "\\\"");
+    let msg_opt =
+        if msg.is_empty() { "".into() }
+        else { format!(", msg=\"{msg_join}\"") };
+    let url_display =
+        if msg.is_empty() { "".into() }
+        else { url.replace("https://", "") };
+    let body = format!(
+r##"
+# TYPE build_score gauge
+# HELP build_score 1.0 for successful build, 0.0 for failed build
+build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt} }} {build_score}
+"##);
+    println!("body={body}");
+    let client = reqwest::Client::new();
+    let pushgateway = format!("http://localhost:9091/metrics/job/{user}/instance/{target}");
+    let res = client
+        .post(pushgateway)
+        .body(body)
+        .send()
+        .await?;
+    println!("res={res:?}");
+    if !res.status().is_success() {
+        println!("*** Pushgateway Failed");
+    }
     sleep(Duration::from_secs(5));
     Ok(())
 }
