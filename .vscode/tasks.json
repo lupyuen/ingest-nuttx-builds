@@ -7,7 +7,7 @@
             "label": "Build",
             "type": "shell",
 
-            "command": ". $HOME/github-token.sh && cargo run -- --user nuttxpr && cargo run -- --user jerpelea",
+            "command": ". $HOME/github-token.sh && find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt && cargo run -- --user nuttxpr --defconfig /tmp/defconfig.txt && cargo run -- --user jerpelea --defconfig /tmp/defconfig.txt ",
 
             "problemMatcher": "$rustc",
             "group": {
