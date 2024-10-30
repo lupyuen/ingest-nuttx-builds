@@ -63,10 +63,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let body = res.text().await?;
         println!("Body:\n{}", body);
 
+        // Process the Build Log
+        process_log(&body).await?;
+
         // Wait a while
         sleep(Duration::from_secs(5));
     }
 
     // Return OK
+    Ok(())
+}
+
+/// Process the Build Log:
+/// ====================================================================================
+/// Configuration/Tool: freedom-kl25z/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/// 2024-10-30 00:43:37
+/// ------------------------------------------------------------------------------------
+///   Cleaning...
+///   Configuring...
+///   Disabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
+///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
+///   Building NuttX...
+///   Normalize freedom-kl25z/nsh
+/// ====================================================================================
+async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
