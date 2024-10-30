@@ -10,7 +10,7 @@ To ingest NuttX Build Logs into Prometheus Pushgateway...
 ## Any GitHub Token with read access will do:
 ## export GITHUB_TOKEN=...
 . $HOME/github-token.sh
-find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt
+find $HOME/nuttx -name defconfig >/tmp/defconfig.txt
 cargo run -- --user nuttxpr  --defconfig /tmp/defconfig.txt
 cargo run -- --user jerpelea --defconfig /tmp/defconfig.txt
 ```
