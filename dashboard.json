@@ -46,7 +46,7 @@
             {
               "targetBlank": true,
               "title": "Show the Build Details",
-              "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
+              "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-subarch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
             }
           ],
           "mappings": [],
@@ -100,7 +100,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -153,6 +153,7 @@
               "instance": true,
               "job": true,
               "msg": true,
+              "subarch": true,
               "target": true,
               "timestamp": true,
               "url": true,
@@ -242,7 +243,32 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Message"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 411
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Config"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 128
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
@@ -261,7 +287,8 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "11.3.0-pre",
       "targets": [
@@ -273,7 +300,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -326,6 +353,7 @@
               "instance": true,
               "job": true,
               "msg": false,
+              "subarch": true,
               "target": true,
               "timestamp": false,
               "url": false,
@@ -346,13 +374,14 @@
               "group": 7,
               "instance": 8,
               "job": 9,
-              "msg": 14,
+              "msg": 13,
+              "subarch": 18,
               "target": 10,
-              "timestamp": 11,
+              "timestamp": 14,
               "url": 15,
               "url_display": 16,
-              "user": 12,
-              "version": 13
+              "user": 11,
+              "version": 12
             },
             "renameByName": {
               "arch": "Arch",
@@ -418,7 +447,44 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 219
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Config"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 171
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 215
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 12,
@@ -437,7 +503,8 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "11.3.0-pre",
       "targets": [
@@ -449,7 +516,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -502,6 +569,7 @@
               "instance": true,
               "job": true,
               "msg": true,
+              "subarch": true,
               "target": true,
               "timestamp": false,
               "url": false,
@@ -522,13 +590,14 @@
               "group": 7,
               "instance": 8,
               "job": 9,
-              "msg": 14,
+              "msg": 13,
+              "subarch": 18,
               "target": 10,
-              "timestamp": 11,
+              "timestamp": 14,
               "url": 15,
               "url_display": 16,
-              "user": 12,
-              "version": 13
+              "user": 11,
+              "version": 12
             },
             "renameByName": {
               "arch": "Arch",
@@ -589,34 +658,14 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values(group)",
+        "definition": "label_values({arch=~\"$arch\"},subarch)",
         "includeAll": true,
-        "label": "Group",
-        "name": "group",
+        "label": "SubArch",
+        "name": "subarch",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(group)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 5,
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "definition": "label_values(board)",
-        "includeAll": true,
-        "label": "Board",
-        "name": "board",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(board)",
+          "query": "label_values({arch=~\"$arch\"},subarch)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -629,14 +678,54 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values(config)",
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\"},group)",
+        "includeAll": true,
+        "label": "Group",
+        "name": "group",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\"},group)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\"},board)",
+        "includeAll": true,
+        "label": "Board",
+        "name": "board",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\"},board)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\"},config)",
         "includeAll": true,
         "label": "Config",
         "name": "config",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(config)",
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\"},config)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -654,6 +743,6 @@
   "timezone": "browser",
   "title": "Build Logs from NuttX Build Farm",
   "uid": "fe2bqg6uk7nr4a",
-  "version": 77,
+  "version": 91,
   "weekStart": ""
 }

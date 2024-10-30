@@ -28,7 +28,7 @@
         {
           "targetBlank": true,
           "title": "Show the Build Details",
-          "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
+          "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-subarch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
         }
       ]
     },
@@ -66,6 +66,7 @@
           "Time": true,
           "Value": false,
           "__name__": true,
+          "arch": true,
           "board": false,
           "config": false,
           "exported_instance": true,
@@ -74,14 +75,15 @@
           "instance": true,
           "job": true,
           "msg": true,
+          "subarch": true,
           "target": true,
           "timestamp": true,
           "url": true,
           "url_display": true,
           "user": true,
-          "version": true,
-          "arch": true
+          "version": true
         },
+        "includeByName": {},
         "indexByName": {
           "Time": 0,
           "Value": 16,
@@ -101,8 +103,7 @@
           "user": 12,
           "version": 13
         },
-        "renameByName": {},
-        "includeByName": {}
+        "renameByName": {}
       }
     },
     {
@@ -136,7 +137,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,

@@ -39,7 +39,44 @@
         }
       ]
     },
-    "overrides": []
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Board"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 219
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Config"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 171
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Timestamp"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 215
+          }
+        ]
+      }
+    ]
   },
   "transformations": [
     {
@@ -73,6 +110,7 @@
           "Time": true,
           "Value": true,
           "__name__": true,
+          "arch": true,
           "board": false,
           "config": false,
           "exported_instance": true,
@@ -81,13 +119,13 @@
           "instance": true,
           "job": true,
           "msg": true,
+          "subarch": true,
           "target": true,
           "timestamp": false,
           "url": false,
           "url_display": true,
           "user": true,
-          "version": true,
-          "arch": true
+          "version": true
         },
         "indexByName": {
           "Time": 0,
@@ -101,22 +139,23 @@
           "instance": 8,
           "job": 9,
           "target": 10,
-          "timestamp": 11,
-          "user": 12,
-          "version": 13,
-          "msg": 14,
+          "user": 11,
+          "version": 12,
+          "msg": 13,
+          "timestamp": 14,
           "url": 15,
           "url_display": 16,
-          "Value": 17
+          "Value": 17,
+          "subarch": 18
         },
         "renameByName": {
+          "arch": "Arch",
           "board": "Board",
           "config": "Config",
           "job": "",
           "msg": "Message",
           "timestamp": "Timestamp",
-          "url": "Build Log",
-          "arch": "Arch"
+          "url": "Build Log"
         },
         "includeByName": {}
       }
@@ -146,7 +185,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,
@@ -171,6 +210,7 @@
       ],
       "countRows": false,
       "fields": ""
-    }
+    },
+    "sortBy": []
   }
 }
