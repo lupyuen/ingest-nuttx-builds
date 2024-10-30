@@ -4,7 +4,7 @@ Read the article...
 
 - ["Your very own Build Farm for Apache NuttX RTOS"](https://lupyuen.codeberg.page/articles/ci2.html)
 
-To ingest NuttX Build Logs into Prometheus Pushgateway...
+To ingest NuttX Build Logs into Prometheus Pushgateway: [run.sh](run.sh)
 
 ```bash
 ## Any GitHub Token with read access will do:
