@@ -45,12 +45,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for mut gist in gists {
         let id = gist.id;  // "6e5150f02e081be935fa525e6546cb2b"
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
+
+        // Skip the Dubious Gists
+        // TODO: Skip the filenames we've seen before
         if gist.files.first_entry().is_none() {            
             println!("*** No Files: {url}");
             continue;
         }
         let file = gist.files.first_entry().unwrap();
         let filename = file.get().filename.as_str();  // "ci-arm-04.log"
+        if !filename.starts_with("ci-") {
+            println!("*** Not A Build Log: {url}");
+            continue;
+        }
+
+        // Get the Gist URL
         let raw_url = file.get().raw_url.as_str();  // "https://gist.githubusercontent.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b/raw/9f07185404c0f81914f622c0152a980022539968/ci-arm-04.log"
         let description = gist
             .description
@@ -58,17 +67,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let target_group = filename
             .replace("ci-", "")
             .replace(".log", "");  // "arm-04"
-
-        if !filename.starts_with("ci-") {
-            println!("*** Not A Build Log: {url}");
-            continue;
-        }
         println!("id={id} | url={url} | description={description}");
         println!("target_group={target_group:?}");
         println!("filename={filename:?}");
         println!("raw_url={raw_url:?}");
-
-        // TODO: Skip the filenames we've seen before
 
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
