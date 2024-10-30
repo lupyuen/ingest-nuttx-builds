@@ -173,6 +173,8 @@ async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn st
             msg.push(line);
     }
 
+    // TODO: Compute the Build Score
+
     // Post the Target to Prometheus Pushgateway
     post_to_pushgateway().await?;
     Ok(())
