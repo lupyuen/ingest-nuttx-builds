@@ -1,0 +1,175 @@
+{
+  "id": 3,
+  "type": "stat",
+  "title": "Highlights of Errors / Warnings",
+  "gridPos": {
+    "x": 0,
+    "y": 0,
+    "h": 9,
+    "w": 24
+  },
+  "fieldConfig": {
+    "defaults": {
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      },
+      "color": {
+        "mode": "continuous-YlRd"
+      },
+      "decimals": 1,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Show the Build Details",
+          "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
+        }
+      ]
+    },
+    "overrides": []
+  },
+  "transformations": [
+    {
+      "id": "filterByValue",
+      "options": {
+        "filters": [
+          {
+            "config": {
+              "id": "lowerOrEqual",
+              "options": {
+                "value": "0.5"
+              }
+            },
+            "fieldName": "Value"
+          }
+        ],
+        "match": "any",
+        "type": "include"
+      }
+    },
+    {
+      "id": "labelsToFields",
+      "options": {
+        "mode": "columns"
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time": true,
+          "Value": false,
+          "__name__": true,
+          "board": false,
+          "config": false,
+          "exported_instance": true,
+          "exported_job": true,
+          "group": true,
+          "instance": true,
+          "job": true,
+          "msg": true,
+          "target": true,
+          "timestamp": true,
+          "url": true,
+          "url_display": true,
+          "user": true,
+          "version": true,
+          "arch": true
+        },
+        "indexByName": {
+          "Time": 0,
+          "Value": 16,
+          "__name__": 1,
+          "board": 2,
+          "config": 3,
+          "exported_instance": 4,
+          "exported_job": 5,
+          "group": 6,
+          "instance": 7,
+          "job": 8,
+          "msg": 14,
+          "target": 9,
+          "timestamp": 10,
+          "url": 11,
+          "url_display": 15,
+          "user": 12,
+          "version": 13
+        },
+        "renameByName": {},
+        "includeByName": {}
+      }
+    },
+    {
+      "id": "formatString",
+      "options": {
+        "outputFormat": "Upper Case",
+        "stringField": "target"
+      }
+    },
+    {
+      "id": "formatString",
+      "options": {
+        "outputFormat": "Upper Case",
+        "stringField": "config"
+      }
+    },
+    {
+      "id": "limit",
+      "options": {
+        "limitField": "8"
+      }
+    }
+  ],
+  "pluginVersion": "11.3.0-pre",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "disableTextWrap": false,
+      "editorMode": "builder",
+      "exemplar": false,
+      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+      "format": "table",
+      "fullMetaSearch": false,
+      "includeNullMetadata": true,
+      "instant": true,
+      "legendFormat": "__auto",
+      "range": false,
+      "refId": "A",
+      "useBackend": false
+    }
+  ],
+  "datasource": {
+    "type": "prometheus",
+    "uid": "be2a71h9hs2dcb"
+  },
+  "options": {
+    "reduceOptions": {
+      "values": true,
+      "calcs": [
+        "last"
+      ],
+      "fields": "/^Value$/",
+      "limit": 100
+    },
+    "orientation": "auto",
+    "textMode": "name",
+    "wideLayout": true,
+    "colorMode": "background",
+    "graphMode": "area",
+    "justifyMode": "center",
+    "showPercentChange": false,
+    "percentChangeColorMode": "standard",
+    "text": {
+      "titleSize": 100
+    }
+  }
+}

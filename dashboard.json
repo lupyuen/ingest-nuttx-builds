@@ -1,0 +1,659 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "be2a71h9hs2dcb"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "New annotation"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd"
+          },
+          "decimals": 1,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Show the Build Details",
+              "url": "/d/fe2bqg6uk7nr4a/home-dashboard?var-arch=$__all&var-group=$__all&var-board=${__data.fields.board}&var-config=$__all"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^Value$/",
+          "limit": 100,
+          "values": true
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 100
+        },
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.3.0-pre",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "be2a71h9hs2dcb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Highlights of Errors / Warnings",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "lowerOrEqual",
+                  "options": {
+                    "value": "0.5"
+                  }
+                },
+                "fieldName": "Value"
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": false,
+              "__name__": true,
+              "arch": true,
+              "board": false,
+              "config": false,
+              "exported_instance": true,
+              "exported_job": true,
+              "group": true,
+              "instance": true,
+              "job": true,
+              "msg": true,
+              "target": true,
+              "timestamp": true,
+              "url": true,
+              "url_display": true,
+              "user": true,
+              "version": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "Value": 16,
+              "__name__": 1,
+              "board": 2,
+              "config": 3,
+              "exported_instance": 4,
+              "exported_job": 5,
+              "group": 6,
+              "instance": 7,
+              "job": 8,
+              "msg": 14,
+              "target": 9,
+              "timestamp": 10,
+              "url": 11,
+              "url_display": 15,
+              "user": 12,
+              "version": 13
+            },
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "target"
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "config"
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": "8"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 1,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Show the Build Log",
+              "url": "${__data.fields.url}"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0-pre",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "be2a71h9hs2dcb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Builds with Errors / Warnings",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "lowerOrEqual",
+                  "options": {
+                    "value": "0.5"
+                  }
+                },
+                "fieldName": "Value"
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "arch": true,
+              "board": false,
+              "config": false,
+              "exported_instance": true,
+              "exported_job": true,
+              "group": true,
+              "instance": true,
+              "job": true,
+              "msg": false,
+              "target": true,
+              "timestamp": false,
+              "url": false,
+              "url_display": true,
+              "user": true,
+              "version": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "Value": 17,
+              "__name__": 1,
+              "arch": 2,
+              "board": 3,
+              "config": 4,
+              "exported_instance": 5,
+              "exported_job": 6,
+              "group": 7,
+              "instance": 8,
+              "job": 9,
+              "msg": 14,
+              "target": 10,
+              "timestamp": 11,
+              "url": 15,
+              "url_display": 16,
+              "user": 12,
+              "version": 13
+            },
+            "renameByName": {
+              "arch": "Arch",
+              "board": "Board",
+              "config": "Config",
+              "job": "",
+              "msg": "Message",
+              "timestamp": "Timestamp",
+              "url": "Build Log"
+            }
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "target"
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "config"
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 1,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Show the Build Log",
+              "url": "${__data.fields.url}"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.3.0-pre",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "be2a71h9hs2dcb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Successful Builds",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "1.0"
+                  }
+                },
+                "fieldName": "Value"
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "arch": true,
+              "board": false,
+              "config": false,
+              "exported_instance": true,
+              "exported_job": true,
+              "group": true,
+              "instance": true,
+              "job": true,
+              "msg": true,
+              "target": true,
+              "timestamp": false,
+              "url": false,
+              "url_display": true,
+              "user": true,
+              "version": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 0,
+              "Value": 17,
+              "__name__": 1,
+              "arch": 2,
+              "board": 3,
+              "config": 4,
+              "exported_instance": 5,
+              "exported_job": 6,
+              "group": 7,
+              "instance": 8,
+              "job": 9,
+              "msg": 14,
+              "target": 10,
+              "timestamp": 11,
+              "url": 15,
+              "url_display": 16,
+              "user": 12,
+              "version": 13
+            },
+            "renameByName": {
+              "arch": "Arch",
+              "board": "Board",
+              "config": "Config",
+              "job": "",
+              "msg": "Message",
+              "timestamp": "Timestamp",
+              "url": "Build Log"
+            }
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "target"
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "config"
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(arch)",
+        "includeAll": true,
+        "label": "Arch",
+        "name": "arch",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(arch)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(group)",
+        "includeAll": true,
+        "label": "Group",
+        "name": "group",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(group)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(board)",
+        "includeAll": true,
+        "label": "Board",
+        "name": "board",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(board)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(config)",
+        "includeAll": true,
+        "label": "Config",
+        "name": "config",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(config)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Build Logs from NuttX Build Farm",
+  "uid": "fe2bqg6uk7nr4a",
+  "version": 77,
+  "weekStart": ""
+}

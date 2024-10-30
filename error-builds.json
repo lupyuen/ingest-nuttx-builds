@@ -1,0 +1,176 @@
+{
+  "id": 4,
+  "type": "table",
+  "title": "Builds with Errors / Warnings",
+  "gridPos": {
+    "x": 0,
+    "y": 9,
+    "h": 10,
+    "w": 24
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          }
+        ]
+      },
+      "color": {
+        "mode": "continuous-YlRd"
+      },
+      "decimals": 1,
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Show the Build Log",
+          "url": "${__data.fields.url}"
+        }
+      ]
+    },
+    "overrides": []
+  },
+  "transformations": [
+    {
+      "id": "filterByValue",
+      "options": {
+        "filters": [
+          {
+            "config": {
+              "id": "lowerOrEqual",
+              "options": {
+                "value": "0.5"
+              }
+            },
+            "fieldName": "Value"
+          }
+        ],
+        "match": "any",
+        "type": "include"
+      }
+    },
+    {
+      "id": "labelsToFields",
+      "options": {
+        "mode": "columns"
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {
+          "Time": true,
+          "Value": true,
+          "__name__": true,
+          "board": false,
+          "config": false,
+          "exported_instance": true,
+          "exported_job": true,
+          "group": true,
+          "instance": true,
+          "job": true,
+          "msg": false,
+          "target": true,
+          "timestamp": false,
+          "url": false,
+          "url_display": true,
+          "user": true,
+          "version": true,
+          "arch": true
+        },
+        "indexByName": {
+          "Time": 0,
+          "__name__": 1,
+          "arch": 2,
+          "board": 3,
+          "config": 4,
+          "exported_instance": 5,
+          "exported_job": 6,
+          "group": 7,
+          "instance": 8,
+          "job": 9,
+          "target": 10,
+          "timestamp": 11,
+          "user": 12,
+          "version": 13,
+          "msg": 14,
+          "url": 15,
+          "url_display": 16,
+          "Value": 17
+        },
+        "renameByName": {
+          "board": "Board",
+          "config": "Config",
+          "job": "",
+          "msg": "Message",
+          "timestamp": "Timestamp",
+          "url": "Build Log",
+          "arch": "Arch"
+        },
+        "includeByName": {}
+      }
+    },
+    {
+      "id": "formatString",
+      "options": {
+        "outputFormat": "Upper Case",
+        "stringField": "target"
+      }
+    },
+    {
+      "id": "formatString",
+      "options": {
+        "outputFormat": "Upper Case",
+        "stringField": "config"
+      }
+    }
+  ],
+  "pluginVersion": "11.3.0-pre",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "disableTextWrap": false,
+      "editorMode": "builder",
+      "exemplar": false,
+      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\"}",
+      "format": "table",
+      "fullMetaSearch": false,
+      "includeNullMetadata": true,
+      "instant": true,
+      "legendFormat": "__auto",
+      "range": false,
+      "refId": "A",
+      "useBackend": false
+    }
+  ],
+  "datasource": {
+    "type": "prometheus",
+    "uid": "be2a71h9hs2dcb"
+  },
+  "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "footer": {
+      "show": false,
+      "reducer": [
+        "sum"
+      ],
+      "countRows": false,
+      "fields": ""
+    }
+  }
+}
