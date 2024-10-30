@@ -35,3 +35,13 @@ cd pushgateway
 go run main.go &
 ## Browse to http://localhost:9091
 ```
+
+Update the Grafana and Prometheus Configuration...
+- [/opt/homebrew/etc/grafana/grafana.ini](grafana.ini)
+- [/opt/homebrew/etc/prometheus.yml](prometheus.yml)
+
+Add the Grafana Dashboard and Panels...
+- [dashboard.json](dashboard.json)
+- [highlights.json](highlights.json)
+- [error-builds.json](error-builds.json)
+- [success-builds.json](success-builds.json)
