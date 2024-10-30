@@ -8,5 +8,6 @@ clap = { version = "4.5.18", features = ["derive"] }
 env_logger = "0.11.5"
 log = "0.4.22"
 octocrab = "0.41.2"
+regex = "1.11.1"
 reqwest = { version = "0.12.9", features = ["blocking"] }
 tokio = { version = "1.41.0", features = ["full"] }

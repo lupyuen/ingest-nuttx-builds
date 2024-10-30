@@ -13,6 +13,7 @@ use std::{
 use clap::Parser;
 use env_logger::Target;
 use log::info;
+use regex::Regex;
 
 /// Command-Line Arguments
 #[derive(Parser, Debug)]
@@ -120,9 +121,22 @@ async fn process_log(log: &str) -> Result<(), Box<dyn std::error::Error>> {
 ///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
-async fn process_target(target: &[&str], linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}", target[0]);
-    println!("{}", target.last().unwrap());
+async fn process_target(lines: &[&str], linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
+    println!("lines[0]={}", lines[0]);
+    println!("lines.last={}", lines.last().unwrap());
+
+    // Find the Target Name
+    let re = Regex::new("^Configuration/Tool: ([^,]+)").unwrap();
+    let caps = re.captures(lines[0]);
+    if caps.is_none() {
+        println!("Not a target: {}", lines[0]);
+        return Ok(())
+    }
+    let target = caps.unwrap()  // "freedom-kl25z/nsh"
+        .get(1).unwrap()
+        .as_str();
+    let target = target.replace("/", ":");  // "freedom-kl25z:nsh"
+    println!("target={target}");
     sleep(Duration::from_secs(5));
     Ok(())
 }
