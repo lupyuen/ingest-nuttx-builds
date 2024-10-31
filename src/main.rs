@@ -369,7 +369,6 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
     if !res.status().is_success() {
         println!("*** Pushgateway Failed");
     }
-    sleep(Duration::from_secs(10));
     Ok(())
 }
 
