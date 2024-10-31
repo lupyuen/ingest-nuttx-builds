@@ -185,7 +185,10 @@ async fn process_target(lines: &[&str], user: &str, defconfig: &str, group: &str
             line.starts_with("Building") ||
             line.starts_with("Normalize") ||
             line.starts_with("% Total") ||
-            line.starts_with("Dload")
+            line.starts_with("Dload") ||
+            line.starts_with("~/apps") ||
+            line.starts_with("~/nuttx") ||
+            line.contains("FPU test not built")
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
@@ -245,7 +248,7 @@ async fn post_to_pushgateway(
     msg: &Vec<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
-    let version = 2;
+    let version = 3;
     let target_split = target.split(":").collect::<Vec<_>>();
     let board = target_split[0];
     let config = target_split[1];
