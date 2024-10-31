@@ -93,7 +93,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // println!("Body:\n{}", body);
 
         // Process the Build Log
-        process_log(&body, &args.user, &args.defconfig, &target_group, &url.as_str(), &filename).await?;
+        process_log(
+            &body, &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
+            None, None, None
+        ).await?;
 
         // Wait a while
         sleep(Duration::from_secs(1));
@@ -121,7 +124,10 @@ async fn process_log(
     defconfig: &str,  // "/tmp/defconfig.txt"
     group: &str,  // "arm-04"
     url: &str,  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
-    filename: &str  // "ci-arm-04.log"
+    filename: &str,  // "ci-arm-04.log"
+    run_id: Option<&str>,  // "11603561928"
+    job_id: Option<&str>,  // "32310817851"
+    step: Option<&str>,  // "7"
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Look for the delimiter
     const DELIMITER: &str = "==========";
@@ -132,7 +138,10 @@ async fn process_log(
             // Process the target
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
-                process_target(target, user, defconfig, group, url, filename, l).await?;
+                process_target(
+                    target, user, defconfig, group, url, filename,
+                    run_id, job_id, step, l
+                ).await?;
             }
             target_linenum = Some(linenum + 1);
         }
@@ -150,7 +159,18 @@ async fn process_log(
 ///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
-async fn process_target(lines: &[&str], user: &str, defconfig: &str, group: &str, url: &str, filename: &str, linenum: usize) -> Result<(), Box<dyn std::error::Error>> {
+async fn process_target(
+    lines: &[&str],  // Content of Build Log
+    user: &str,  // "nuttxpr"
+    defconfig: &str,  // "/tmp/defconfig.txt"
+    group: &str,  // "arm-04"
+    url: &str,  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
+    filename: &str,  // "ci-arm-04.log"
+    run_id: Option<&str>,  // "11603561928"
+    job_id: Option<&str>,  // "32310817851"
+    step: Option<&str>,  // "7"
+    linenum: usize,  // Line Number of Build Log
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
     let mut l = 0;
@@ -222,7 +242,13 @@ async fn process_target(lines: &[&str], user: &str, defconfig: &str, group: &str
     // And `filename``: ci-arm-04.log
     let filename2 = filename.replace(".", "-");
     let linenum2 = linenum + l - 1;
-    let url = format!("{url}#file-{filename2}-L{linenum2}");
+    let url =
+        if let Some(run_id) = run_id {
+            let job_id = job_id.unwrap();
+            let step = step.unwrap();
+            format!("https://github.com/{user}/actions/runs/{run_id}/job/{job_id}#step:{step}:{linenum2}")
+        }
+        else { format!("{url}#file-{filename2}-L{linenum2}") };
 
     // Post the Target to Prometheus Pushgateway
     post_to_pushgateway(
