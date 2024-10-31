@@ -115,7 +115,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
 /// ====================================================================================
-async fn process_log(log: &str, user: &str, defconfig: &str, group: &str, url: &str, filename: &str) -> Result<(), Box<dyn std::error::Error>> {
+async fn process_log(
+    log: &str,  // Content of Build Log
+    user: &str,  // "nuttxpr"
+    defconfig: &str,  // "/tmp/defconfig.txt"
+    group: &str,  // "arm-04"
+    url: &str,  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
+    filename: &str  // "ci-arm-04.log"
+) -> Result<(), Box<dyn std::error::Error>> {
     // Look for the delimiter
     const DELIMITER: &str = "==========";
     let mut target_linenum: Option<usize> = None;
