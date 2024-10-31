@@ -45,3 +45,10 @@ Add the Grafana Dashboard and Panels...
 - [highlights.json](highlights.json)
 - [error-builds.json](error-builds.json)
 - [success-builds.json](success-builds.json)
+
+Remember to check for suspicious activity!
+
+```bash
+tail -f /opt/homebrew/var/log/grafana/grafana.log \
+  | grep -v /api/live/ws
+```
