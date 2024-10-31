@@ -7,7 +7,7 @@ use std::{
     collections::HashSet,
     fs::File,
     io::{BufReader, BufRead},
-    thread::sleep, 
+    thread::sleep,
     time::Duration,
     vec,
 };
@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
 
         // Skip the Dubious Gists
-        if gist.files.first_entry().is_none() {            
+        if gist.files.first_entry().is_none() {
             println!("*** No Files: {url}");
             continue;
         }
@@ -88,7 +88,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
         // println!("Status: {}", res.status());
-        // println!("Headers:\n{:#?}", res.headers());    
+        // println!("Headers:\n{:#?}", res.headers());
         let body = res.text().await?;
         // println!("Body:\n{}", body);
 
@@ -176,17 +176,26 @@ async fn process_target(lines: &[&str], user: &str, defconfig: &str, group: &str
     for line in lines {
         let line = line.trim();
         if line.starts_with("----------") ||
+            line.starts_with("-- ") ||  // "-- Build type:"
             line.starts_with("Cleaning") ||
             line.starts_with("Configuring") ||
             line.starts_with("Select") ||
             line.starts_with("Disabling") ||
             line.starts_with("Enabling") ||
             line.starts_with("Building") ||
-            line.starts_with("Normalize") {
-                continue;
-            }
-            println!("*** Msg: {line}");
-            msg.push(line);
+            line.starts_with("Normalize") ||
+            line.starts_with("% Total") ||
+            line.starts_with("Dload")
+        { continue; }
+
+        // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
+        let re = Regex::new(r#"^[0-9]+\s+[0-9]+"#).unwrap();
+        let caps = re.captures(line);
+        if caps.is_some() { continue; }
+
+        // Remember the Error / Waning
+        println!("*** Msg: {line}");
+        msg.push(line);
     }
 
     // Compute the Build Score based on Error vs Warning
