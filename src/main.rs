@@ -244,6 +244,7 @@ async fn process_target(
     let linenum2 = linenum + l - 1;
     let url =
         if let Some(run_id) = run_id {
+            assert_eq!(url, "");
             let job_id = job_id.unwrap();
             let step = step.unwrap();
             format!("https://github.com/{user}/actions/runs/{run_id}/job/{job_id}#step:{step}:{linenum2}")
