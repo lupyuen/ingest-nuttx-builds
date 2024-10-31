@@ -17,11 +17,20 @@
           {
             "color": "green",
             "value": null
+          },
+          {
+            "value": 0,
+            "color": "red"
+          },
+          {
+            "value": 0.5,
+            "color": "#EAB839"
           }
         ]
       },
       "color": {
-        "mode": "continuous-YlRd"
+        "mode": "thresholds",
+        "fixedColor": "yellow"
       },
       "decimals": 1,
       "links": [
@@ -35,6 +44,24 @@
     "overrides": []
   },
   "transformations": [
+    {
+      "id": "filterByValue",
+      "options": {
+        "filters": [
+          {
+            "fieldName": "config",
+            "config": {
+              "id": "equal",
+              "options": {
+                "value": "leds64_zig"
+              }
+            }
+          }
+        ],
+        "type": "exclude",
+        "match": "any"
+      }
+    },
     {
       "id": "filterByValue",
       "options": {
@@ -118,6 +145,18 @@
       "options": {
         "outputFormat": "Upper Case",
         "stringField": "config"
+      }
+    },
+    {
+      "id": "sortBy",
+      "options": {
+        "fields": {},
+        "sort": [
+          {
+            "field": "Value",
+            "desc": false
+          }
+        ]
       }
     },
     {

@@ -127,9 +127,10 @@
           "user": true,
           "version": true
         },
+        "includeByName": {},
         "indexByName": {
-          "Value": 0,
           "Time": 1,
+          "Value": 0,
           "__name__": 2,
           "arch": 3,
           "board": 4,
@@ -139,26 +140,25 @@
           "group": 8,
           "instance": 9,
           "job": 10,
-          "target": 11,
-          "user": 12,
-          "version": 13,
           "msg": 14,
+          "subarch": 18,
+          "target": 11,
           "timestamp": 15,
           "url": 16,
           "url_display": 17,
-          "subarch": 18
+          "user": 12,
+          "version": 13
         },
         "renameByName": {
+          "Value": "Severity",
           "arch": "Arch",
           "board": "Board",
           "config": "Config",
           "job": "",
           "msg": "Message",
           "timestamp": "Timestamp",
-          "url": "Build Log",
-          "Value": "Severity"
-        },
-        "includeByName": {}
+          "url": "Build Log"
+        }
       }
     },
     {
@@ -214,8 +214,8 @@
     },
     "sortBy": [
       {
-        "displayName": "Severity",
-        "desc": false
+        "desc": false,
+        "displayName": "Severity"
       }
     ]
   }

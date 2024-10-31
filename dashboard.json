@@ -39,7 +39,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-YlRd"
+            "fixedColor": "yellow",
+            "mode": "thresholds"
           },
           "decimals": 1,
           "links": [
@@ -56,6 +57,14 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "#EAB839",
+                "value": 0.5
               }
             ]
           }
@@ -113,6 +122,24 @@
       ],
       "title": "Highlights of Errors / Warnings",
       "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": "leds64_zig"
+                  }
+                },
+                "fieldName": "config"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        },
         {
           "id": "filterByValue",
           "options": {
@@ -196,6 +223,18 @@
           "options": {
             "outputFormat": "Upper Case",
             "stringField": "config"
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": false,
+                "field": "Value"
+              }
+            ]
           }
         },
         {
@@ -770,6 +809,7 @@
         "type": "query"
       },
       {
+        "baseFilters": [],
         "datasource": {
           "type": "prometheus",
           "uid": "be2a71h9hs2dcb"
@@ -788,6 +828,6 @@
   "timezone": "browser",
   "title": "Build Logs from NuttX Build Farm",
   "uid": "fe2bqg6uk7nr4a",
-  "version": 107,
+  "version": 108,
   "weekStart": ""
 }
