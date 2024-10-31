@@ -261,7 +261,8 @@ async fn process_target(
             line.starts_with("Dload") ||
             line.starts_with("~/apps") ||
             line.starts_with("~/nuttx") ||
-            line.starts_with("find: 'boards/") || // "find: 'boards/risc-v/q[0-d]*': No such file or directory"
+            line.starts_with("find: 'boards/") ||  // "find: 'boards/risc-v/q[0-d]*': No such file or directory"
+            line.starts_with("|        ^~~~~~~") ||  // `warning "FPU test not built; Only available in the flat build (CONFIG_BUILD_FLAT)"`
             line.contains("FPU test not built")
         { continue; }
 
