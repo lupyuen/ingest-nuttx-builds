@@ -21,7 +21,7 @@ function ingest_log {
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer $GITHUB_TOKEN" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      https://api.github.com/repos/$user/$repo/actions/runs/$run_id/jobs \
+      https://api.github.com/repos/$user/$repo/actions/runs/$run_id/jobs?per_page=100 \
       | jq ".jobs | map(select(.name == \"$job_name\")) | .[].id"
       # | jq ".jobs | map(select(.id == $job_id)) | .[].name"
       # | jq ".jobs[].id,.jobs[].name"
@@ -102,6 +102,7 @@ unzip /tmp/run-log.zip
 popd
 
 ## For All Target Groups
+## TODO: macOS, msvc, msys2
 for group in \
   arm-01 arm-02 arm-03 arm-04 \
   arm-05 arm-06 arm-07 arm-08 \
