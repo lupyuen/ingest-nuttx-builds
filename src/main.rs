@@ -245,7 +245,7 @@ async fn post_to_pushgateway(
     msg: &Vec<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
-    let version = 1;
+    let version = 2;
     let target_split = target.split(":").collect::<Vec<_>>();
     let board = target_split[0];
     let config = target_split[1];
