@@ -19,18 +19,18 @@
             "value": null
           },
           {
-            "value": 0,
-            "color": "red"
+            "color": "red",
+            "value": 0
           },
           {
-            "value": 0.5,
-            "color": "#EAB839"
+            "color": "#EAB839",
+            "value": 0.5
           }
         ]
       },
       "color": {
-        "mode": "thresholds",
-        "fixedColor": "yellow"
+        "fixedColor": "yellow",
+        "mode": "thresholds"
       },
       "decimals": 1,
       "links": [
@@ -49,17 +49,17 @@
       "options": {
         "filters": [
           {
-            "fieldName": "config",
             "config": {
               "id": "equal",
               "options": {
                 "value": "leds64_zig"
               }
-            }
+            },
+            "fieldName": "config"
           }
         ],
-        "type": "exclude",
-        "match": "any"
+        "match": "any",
+        "type": "exclude"
       }
     },
     {
@@ -153,8 +153,8 @@
         "fields": {},
         "sort": [
           {
-            "field": "Value",
-            "desc": false
+            "desc": false,
+            "field": "Value"
           }
         ]
       }

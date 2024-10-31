@@ -75,6 +75,18 @@
             "value": 215
           }
         ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Message"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 338
+          }
+        ]
       }
     ]
   },
@@ -85,9 +97,9 @@
         "filters": [
           {
             "config": {
-              "id": "equal",
+              "id": "greater",
               "options": {
-                "value": "1.0"
+                "value": "0.5"
               }
             },
             "fieldName": "Value"
@@ -118,7 +130,7 @@
           "group": true,
           "instance": true,
           "job": true,
-          "msg": true,
+          "msg": false,
           "subarch": true,
           "target": true,
           "timestamp": false,

@@ -19,7 +19,7 @@
           "uid": "be2a71h9hs2dcb"
         },
         "enable": true,
-        "hide": false,
+        "hide": true,
         "iconColor": "red",
         "name": "New annotation"
       }
@@ -540,6 +540,18 @@
                 "value": 215
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Message"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 338
+              }
+            ]
           }
         ]
       },
@@ -597,9 +609,9 @@
             "filters": [
               {
                 "config": {
-                  "id": "equal",
+                  "id": "greater",
                   "options": {
-                    "value": "1.0"
+                    "value": "0.5"
                   }
                 },
                 "fieldName": "Value"
@@ -630,7 +642,7 @@
               "group": true,
               "instance": true,
               "job": true,
-              "msg": true,
+              "msg": false,
               "subarch": true,
               "target": true,
               "timestamp": false,
@@ -828,6 +840,6 @@
   "timezone": "browser",
   "title": "Build Logs from NuttX Build Farm",
   "uid": "fe2bqg6uk7nr4a",
-  "version": 108,
+  "version": 110,
   "weekStart": ""
 }
