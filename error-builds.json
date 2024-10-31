@@ -63,6 +63,18 @@
             "value": 128
           }
         ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Severity"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 90
+          }
+        ]
       }
     ]
   },
@@ -96,7 +108,7 @@
       "options": {
         "excludeByName": {
           "Time": true,
-          "Value": true,
+          "Value": false,
           "__name__": true,
           "arch": true,
           "board": false,
@@ -116,24 +128,24 @@
           "version": true
         },
         "indexByName": {
-          "Time": 0,
-          "__name__": 1,
-          "arch": 2,
-          "board": 3,
-          "config": 4,
-          "exported_instance": 5,
-          "exported_job": 6,
-          "group": 7,
-          "instance": 8,
-          "job": 9,
-          "target": 10,
-          "user": 11,
-          "version": 12,
-          "msg": 13,
-          "timestamp": 14,
-          "url": 15,
-          "url_display": 16,
-          "Value": 17,
+          "Value": 0,
+          "Time": 1,
+          "__name__": 2,
+          "arch": 3,
+          "board": 4,
+          "config": 5,
+          "exported_instance": 6,
+          "exported_job": 7,
+          "group": 8,
+          "instance": 9,
+          "job": 10,
+          "target": 11,
+          "user": 12,
+          "version": 13,
+          "msg": 14,
+          "timestamp": 15,
+          "url": 16,
+          "url_display": 17,
           "subarch": 18
         },
         "renameByName": {
@@ -143,7 +155,8 @@
           "job": "",
           "msg": "Message",
           "timestamp": "Timestamp",
-          "url": "Build Log"
+          "url": "Build Log",
+          "Value": "Severity"
         },
         "includeByName": {}
       }
@@ -173,7 +186,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", config!=\"leds64_zig\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,
@@ -199,6 +212,11 @@
       "countRows": false,
       "fields": ""
     },
-    "sortBy": []
+    "sortBy": [
+      {
+        "displayName": "Severity",
+        "desc": false
+      }
+    ]
   }
 }

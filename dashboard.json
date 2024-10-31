@@ -100,7 +100,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+          "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -187,8 +187,8 @@
         {
           "id": "formatString",
           "options": {
-            "outputFormat": "Upper Case",
-            "stringField": "target"
+            "outputFormat": "Lower Case",
+            "stringField": "board"
           }
         },
         {
@@ -267,6 +267,18 @@
                 "value": 128
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
           }
         ]
       },
@@ -288,7 +300,12 @@
           "show": false
         },
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Severity"
+          }
+        ]
       },
       "pluginVersion": "11.3.0-pre",
       "targets": [
@@ -300,7 +317,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+          "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", config!=\"leds64_zig\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -342,7 +359,7 @@
           "options": {
             "excludeByName": {
               "Time": true,
-              "Value": true,
+              "Value": false,
               "__name__": true,
               "arch": true,
               "board": false,
@@ -363,27 +380,28 @@
             },
             "includeByName": {},
             "indexByName": {
-              "Time": 0,
-              "Value": 17,
-              "__name__": 1,
-              "arch": 2,
-              "board": 3,
-              "config": 4,
-              "exported_instance": 5,
-              "exported_job": 6,
-              "group": 7,
-              "instance": 8,
-              "job": 9,
-              "msg": 13,
+              "Time": 1,
+              "Value": 0,
+              "__name__": 2,
+              "arch": 3,
+              "board": 4,
+              "config": 5,
+              "exported_instance": 6,
+              "exported_job": 7,
+              "group": 8,
+              "instance": 9,
+              "job": 10,
+              "msg": 14,
               "subarch": 18,
-              "target": 10,
-              "timestamp": 14,
-              "url": 15,
-              "url_display": 16,
-              "user": 11,
-              "version": 12
+              "target": 11,
+              "timestamp": 15,
+              "url": 16,
+              "url_display": 17,
+              "user": 12,
+              "version": 13
             },
             "renameByName": {
+              "Value": "Severity",
               "arch": "Arch",
               "board": "Board",
               "config": "Config",
@@ -504,7 +522,12 @@
           "show": false
         },
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Timestamp"
+          }
+        ]
       },
       "pluginVersion": "11.3.0-pre",
       "targets": [
@@ -516,7 +539,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+          "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
           "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -635,17 +658,30 @@
     "list": [
       {
         "current": {
+          "text": "3",
+          "value": "3"
+        },
+        "description": "For matching the Data Version in ingest-nuttx-builds",
+        "hide": 2,
+        "label": "Version",
+        "name": "version",
+        "query": "3",
+        "skipUrlSync": true,
+        "type": "constant"
+      },
+      {
+        "current": {
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values(arch)",
+        "definition": "label_values({version=\"$version\"},arch)",
         "includeAll": true,
         "label": "Arch",
         "name": "arch",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(arch)",
+          "query": "label_values({version=\"$version\"},arch)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -658,14 +694,14 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values({arch=~\"$arch\"},subarch)",
+        "definition": "label_values({arch=~\"$arch\", version=\"$version\"},subarch)",
         "includeAll": true,
         "label": "SubArch",
         "name": "subarch",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values({arch=~\"$arch\"},subarch)",
+          "query": "label_values({arch=~\"$arch\", version=\"$version\"},subarch)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -678,14 +714,54 @@
           "text": "All",
           "value": "$__all"
         },
-        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\"},group)",
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", version=\"$version\"},board)",
+        "includeAll": true,
+        "label": "Board",
+        "name": "board",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", version=\"$version\"},board)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\", version=\"$version\"},config)",
+        "includeAll": true,
+        "label": "Config",
+        "name": "config",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\", version=\"$version\"},config)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", version=\"$version\"},group)",
         "includeAll": true,
         "label": "Group",
         "name": "group",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\"},group)",
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", version=\"$version\"},group)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -694,44 +770,13 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "All",
-          "value": "$__all"
+        "datasource": {
+          "type": "prometheus",
+          "uid": "be2a71h9hs2dcb"
         },
-        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\"},board)",
-        "includeAll": true,
-        "label": "Board",
-        "name": "board",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\"},board)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\"},config)",
-        "includeAll": true,
-        "label": "Config",
-        "name": "config",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\"},config)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
+        "filters": [],
+        "name": "Filters",
+        "type": "adhoc"
       }
     ]
   },
@@ -743,6 +788,6 @@
   "timezone": "browser",
   "title": "Build Logs from NuttX Build Farm",
   "uid": "fe2bqg6uk7nr4a",
-  "version": 91,
+  "version": 107,
   "weekStart": ""
 }

@@ -109,8 +109,8 @@
     {
       "id": "formatString",
       "options": {
-        "outputFormat": "Upper Case",
-        "stringField": "target"
+        "outputFormat": "Lower Case",
+        "stringField": "board"
       }
     },
     {
@@ -137,7 +137,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,

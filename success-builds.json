@@ -127,8 +127,10 @@
           "user": true,
           "version": true
         },
+        "includeByName": {},
         "indexByName": {
           "Time": 0,
+          "Value": 17,
           "__name__": 1,
           "arch": 2,
           "board": 3,
@@ -138,15 +140,14 @@
           "group": 7,
           "instance": 8,
           "job": 9,
-          "target": 10,
-          "user": 11,
-          "version": 12,
           "msg": 13,
+          "subarch": 18,
+          "target": 10,
           "timestamp": 14,
           "url": 15,
           "url_display": 16,
-          "Value": 17,
-          "subarch": 18
+          "user": 11,
+          "version": 12
         },
         "renameByName": {
           "arch": "Arch",
@@ -156,8 +157,7 @@
           "msg": "Message",
           "timestamp": "Timestamp",
           "url": "Build Log"
-        },
-        "includeByName": {}
+        }
       }
     },
     {
@@ -185,7 +185,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"1\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,
@@ -211,6 +211,11 @@
       "countRows": false,
       "fields": ""
     },
-    "sortBy": []
+    "sortBy": [
+      {
+        "desc": true,
+        "displayName": "Timestamp"
+      }
+    ]
   }
 }
