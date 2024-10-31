@@ -261,6 +261,7 @@ async fn process_target(
             line.starts_with("Dload") ||
             line.starts_with("~/apps") ||
             line.starts_with("~/nuttx") ||
+            line.starts_with("find: 'boards/") || // "find: 'boards/risc-v/q[0-d]*': No such file or directory"
             line.contains("FPU test not built")
         { continue; }
 
