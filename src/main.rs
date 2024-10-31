@@ -4,6 +4,7 @@
 //! Post to Prometheus Pushgateway
 
 use std::{
+    collections::HashSet,
     fs::File,
     io::{BufReader, BufRead},
     thread::sleep, 
@@ -30,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Init the Logger and Command-Line Args
     env_logger::init();
     let args = Args::parse();
+    let mut past_filenames = HashSet::<String>::new();
 
     // Init the GitHub Client
     let token = std::env::var("GITHUB_TOKEN")
@@ -42,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let gists = octocrab
         .gists()
         .list_user_gists(&args.user)
-        .per_page(20)
+        .per_page(50)
         .send()
         .await?;
 
@@ -52,7 +54,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
 
         // Skip the Dubious Gists
-        // TODO: Skip the filenames we've seen before
         if gist.files.first_entry().is_none() {            
             println!("*** No Files: {url}");
             continue;
@@ -63,6 +64,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("*** Not A Build Log: {url}");
             continue;
         }
+
+        // Skip the filenames we've seen before
+        if past_filenames.contains(filename) {
+            println!("*** Skipping File {filename}: {url}");
+            continue;
+        }
+        past_filenames.insert(filename.into());
 
         // Get the Gist URL
         let raw_url = file.get().raw_url.as_str();  // "https://gist.githubusercontent.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b/raw/9f07185404c0f81914f622c0152a980022539968/ci-arm-04.log"
