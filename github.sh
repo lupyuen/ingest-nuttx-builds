@@ -79,6 +79,11 @@ run_id=$(
     --jq '.[].databaseId'
 )
 echo run_id=$run_id
+if [[ "$run_id" == "" ]]; then
+  echo Quitting, no runs for today
+  sleep 10
+  exit
+fi
 
 ## For Testing
 ## run_id=11603561928
