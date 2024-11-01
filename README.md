@@ -55,5 +55,10 @@ Remember to check for suspicious activity!
 
 ```bash
 tail -f /opt/homebrew/var/log/grafana/grafana.log \
-  | grep -v /api/live/ws
+  | grep --line-buffered "logger=context " \
+  | grep --line-buffered -v "path=/api/live/ws " \
+  | grep --line-buffered -v "path=/api/frontend-metrics " \
+  | grep --line-buffered -v "path=/api/user/auth-tokens/rotate " \
+  | grep --line-buffered -v "path=/api/plugins/grafana-lokiexplore-app/settings " \
+  | cut -d ' ' -f 9-
 ```
