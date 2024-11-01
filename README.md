@@ -60,5 +60,9 @@ tail -f /opt/homebrew/var/log/grafana/grafana.log \
   | grep --line-buffered -v "path=/api/frontend-metrics " \
   | grep --line-buffered -v "path=/api/user/auth-tokens/rotate " \
   | grep --line-buffered -v "path=/api/plugins/grafana-lokiexplore-app/settings " \
-  | cut -d ' ' -f 9-
+  | cut -d ' ' -f 9-15
 ```
+
+iTerm Profile > Advanced > Triggers...
+- Regular Expression: `status=[3-9][^ ]+[ ]`, Action: Highlight Line, Background: Red
+- Regular Expression: `path=[^ ]+[ ]`, Action: Highlight Text, Background: Dark Blue
