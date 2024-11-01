@@ -15,7 +15,7 @@
         "cellOptions": {
           "type": "auto"
         },
-        "inspect": false
+        "inspect": true
       },
       "mappings": [],
       "thresholds": {
@@ -216,11 +216,11 @@
     "showHeader": true,
     "cellHeight": "sm",
     "footer": {
-      "show": false,
+      "show": true,
       "reducer": [
-        "sum"
+        "count"
       ],
-      "countRows": false,
+      "countRows": true,
       "fields": ""
     },
     "sortBy": [

@@ -15,9 +15,25 @@
         "cellOptions": {
           "type": "auto"
         },
-        "inspect": false
+        "inspect": true
       },
-      "mappings": [],
+      "mappings": [
+        {
+          "type": "value",
+          "options": {
+            "0": {
+              "text": "Error",
+              "color": "super-light-red",
+              "index": 0
+            },
+            "0.5": {
+              "text": "Warning",
+              "color": "transparent",
+              "index": 1
+            }
+          }
+        }
+      ],
       "thresholds": {
         "mode": "absolute",
         "steps": [
@@ -28,7 +44,7 @@
         ]
       },
       "color": {
-        "mode": "continuous-YlRd"
+        "mode": "thresholds"
       },
       "decimals": 1,
       "links": [
@@ -37,7 +53,8 @@
           "title": "Show the Build Log",
           "url": "${__data.fields.url}"
         }
-      ]
+      ],
+      "fieldMinMax": false
     },
     "overrides": [
       {
@@ -73,6 +90,17 @@
           {
             "id": "custom.width",
             "value": 90
+          },
+          {
+            "id": "custom.cellOptions",
+            "value": {
+              "type": "color-background",
+              "applyToRow": false
+            }
+          },
+          {
+            "id": "custom.align",
+            "value": "center"
           }
         ]
       }
@@ -205,11 +233,11 @@
     "showHeader": true,
     "cellHeight": "sm",
     "footer": {
-      "show": false,
+      "show": true,
       "reducer": [
-        "sum"
+        "count"
       ],
-      "countRows": false,
+      "countRows": true,
       "fields": ""
     },
     "sortBy": [
