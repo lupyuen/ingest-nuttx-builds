@@ -68,19 +68,20 @@ function ingest_log {
 defconfig=/tmp/defconfig.txt
 find $HOME/riscv/nuttx -name defconfig >$defconfig
 
-## Get the latest Run ID for today
+## Get the Latest Completed Run ID for today
 date=$(date -u +'%Y-%m-%d')
 run_id=$(
   gh run list \
     --repo $user/$repo \
     --limit 1 \
     --created $date \
+    --status completed \
     --json databaseId,name,displayTitle,conclusion \
     --jq '.[].databaseId'
 )
 echo run_id=$run_id
 if [[ "$run_id" == "" ]]; then
-  echo Quitting, no runs for today
+  echo Quitting, no completed runs for today
   sleep 10
   exit
 fi
@@ -107,7 +108,7 @@ unzip /tmp/run-log.zip
 popd
 
 ## For All Target Groups
-## TODO: macOS, msvc, msys2
+## TODO: Handle macOS, msvc, msys2 when the warnings have been cleaned up
 for group in \
   arm-01 arm-02 arm-03 arm-04 \
   arm-05 arm-06 arm-07 arm-08 \
@@ -121,5 +122,6 @@ for group in \
   x86_64-01 \
   xtensa-01 xtensa-02
 do
+  ## Ingest the Log File
   ingest_log $group
 done
