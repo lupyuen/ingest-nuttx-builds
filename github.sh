@@ -65,7 +65,7 @@ function ingest_log {
 }
 
 ## Generate the list of deconfigs
-defconfig=/tmp/defconfig.txt
+defconfig=/tmp/defconfig-github.txt
 find $HOME/riscv/nuttx -name defconfig >$defconfig
 
 ## Get the Latest Completed Run ID for today
