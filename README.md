@@ -64,6 +64,8 @@ tail -f /opt/homebrew/var/log/grafana/grafana.log \
   | cut -d ' ' -f 9-15
 ```
 
-iTerm Profile > Advanced > Triggers...
+Highlight the HTTP Errors: iTerm > Profile > Advanced > Triggers...
 - Regular Expression: `status=[4-9][^ ]+[ ]`, Action: Highlight Line, Background: Red
 - Regular Expression: `path=[^ ]+[ ]`, Action: Highlight Text, Background: Dark Blue
+
+If we see too many HTTP 404 Errors for Dubious URLs (we're not a WordPress Server!): Turn on Cloudflare > Under Attack Mode. The errors should disappear.
