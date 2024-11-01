@@ -64,5 +64,5 @@ tail -f /opt/homebrew/var/log/grafana/grafana.log \
 ```
 
 iTerm Profile > Advanced > Triggers...
-- Regular Expression: `status=[3-9][^ ]+[ ]`, Action: Highlight Line, Background: Red
+- Regular Expression: `status=[4-9][^ ]+[ ]`, Action: Highlight Line, Background: Red
 - Regular Expression: `path=[^ ]+[ ]`, Action: Highlight Text, Background: Dark Blue
