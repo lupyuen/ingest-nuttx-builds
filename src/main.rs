@@ -110,6 +110,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("filename={filename:?}");
         println!("raw_url={raw_url:?}");
 
+        // Description contains: [arm-14] CI Log for nuttx @ 7f84a64109f94787d92c2f44465e43fde6f3d28f / nuttx-apps @ d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288
+        // Extract the NuttX Hash and the Apps Hash
+
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
         // println!("Status: {}", res.status());
