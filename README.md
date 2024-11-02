@@ -47,9 +47,12 @@ Update the Grafana and Prometheus Configuration...
 
 Add the Grafana Dashboard and Panels...
 - [dashboard.json](dashboard.json)
-- [highlights.json](highlights.json)
-- [error-builds.json](error-builds.json)
-- [success-builds.json](success-builds.json)
+  - [links.json](links.json)
+  - [highlights.json](highlights.json)
+  - [error-builds.json](error-builds.json)
+  - [success-builds.json](success-builds.json)
+- [dashboard-history.json](dashboard-history.json)
+  - [history.json](history.json)
 
 Remember to check for suspicious activity!
 

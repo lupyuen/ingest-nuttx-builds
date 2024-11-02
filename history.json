@@ -1,11 +1,11 @@
 {
   "id": 4,
   "type": "table",
-  "title": "Builds with Errors / Warnings",
+  "title": "Build History (Select a board and config above)",
   "gridPos": {
     "x": 0,
-    "y": 11,
-    "h": 10,
+    "y": 0,
+    "h": 22,
     "w": 24
   },
   "fieldConfig": {
@@ -24,6 +24,11 @@
               "color": "super-light-red",
               "index": 0,
               "text": "Error"
+            },
+            "1": {
+              "color": "green",
+              "index": 2,
+              "text": "OK"
             },
             "0.5": {
               "color": "transparent",
@@ -52,7 +57,7 @@
         {
           "targetBlank": true,
           "title": "Show the Build Log",
-          "url": "${__data.fields.url}"
+          "url": "${__data.fields[\"Build Log\"]}"
         }
       ]
     },
@@ -77,7 +82,7 @@
         "properties": [
           {
             "id": "custom.width",
-            "value": 128
+            "value": 84
           }
         ]
       },
@@ -103,11 +108,24 @@
             "value": "center"
           }
         ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Timestamp"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 176
+          }
+        ]
       }
     ]
   },
   "transformations": [
     {
+      "disabled": true,
       "id": "filterByValue",
       "options": {
         "filters": [
@@ -157,25 +175,25 @@
         },
         "includeByName": {},
         "indexByName": {
-          "Time": 1,
+          "Time": 2,
           "Value": 0,
-          "__name__": 2,
-          "arch": 3,
-          "board": 4,
-          "config": 5,
-          "exported_instance": 6,
-          "exported_job": 7,
-          "group": 8,
-          "instance": 9,
-          "job": 10,
-          "msg": 14,
+          "__name__": 3,
+          "arch": 4,
+          "board": 5,
+          "config": 6,
+          "exported_instance": 7,
+          "exported_job": 8,
+          "group": 9,
+          "instance": 10,
+          "job": 11,
+          "msg": 15,
           "subarch": 18,
-          "target": 11,
-          "timestamp": 15,
+          "target": 12,
+          "timestamp": 1,
           "url": 16,
           "url_display": 17,
-          "user": 12,
-          "version": 13
+          "user": 13,
+          "version": 14
         },
         "renameByName": {
           "Value": "Severity",
@@ -202,6 +220,67 @@
         "outputFormat": "Upper Case",
         "stringField": "config"
       }
+    },
+    {
+      "id": "groupBy",
+      "options": {
+        "fields": {
+          "Board": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "Build Log": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "Config": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "Message": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "Severity": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "Timestamp": {
+            "aggregations": [],
+            "operation": "groupby"
+          }
+        }
+      }
+    },
+    {
+      "id": "organize",
+      "options": {
+        "excludeByName": {},
+        "includeByName": {},
+        "indexByName": {},
+        "renameByName": {
+          "Board (first)": "Board",
+          "Board (firstNotNull)": "Board",
+          "Build Log (first)": "Build Log",
+          "Build Log (last)": "",
+          "Config (first)": "Config",
+          "Config (firstNotNull)": "Config",
+          "Message (first)": "Message",
+          "Message (firstNotNull)": "Message",
+          "Severity (first)": "Severity",
+          "Severity (firstNotNull)": "Severity"
+        }
+      }
     }
   ],
   "pluginVersion": "11.3.0-pre",
@@ -218,9 +297,9 @@
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,
-      "instant": true,
+      "instant": false,
       "legendFormat": "__auto",
-      "range": false,
+      "range": true,
       "refId": "A",
       "useBackend": false
     }
@@ -242,8 +321,8 @@
     },
     "sortBy": [
       {
-        "desc": false,
-        "displayName": "Severity"
+        "desc": true,
+        "displayName": "Timestamp"
       }
     ]
   }

@@ -1,0 +1,504 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "be2a71h9hs2dcb"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "red",
+        "name": "New annotation"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 6,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "be2a71h9hs2dcb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          },
+          "decimals": 1,
+          "fieldMinMax": false,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Show the Build Log",
+              "url": "${__data.fields[\"Build Log\"]}"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "super-light-red",
+                  "index": 0,
+                  "text": "Error"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "OK"
+                },
+                "0.5": {
+                  "color": "transparent",
+                  "index": 1,
+                  "text": "Warning"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Message"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 411
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Config"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 84
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "applyToRow": false,
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 176
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 22,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "fields": "",
+          "reducer": [
+            "count"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Timestamp"
+          }
+        ]
+      },
+      "pluginVersion": "11.3.0-pre",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "be2a71h9hs2dcb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", config!=\"leds64_zig\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Build History (Select a board and config above)",
+      "transformations": [
+        {
+          "disabled": true,
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "lowerOrEqual",
+                  "options": {
+                    "value": "0.5"
+                  }
+                },
+                "fieldName": "Value"
+              }
+            ],
+            "match": "any",
+            "type": "include"
+          }
+        },
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": false,
+              "__name__": true,
+              "arch": true,
+              "board": false,
+              "config": false,
+              "exported_instance": true,
+              "exported_job": true,
+              "group": true,
+              "instance": true,
+              "job": true,
+              "msg": false,
+              "subarch": true,
+              "target": true,
+              "timestamp": false,
+              "url": false,
+              "url_display": true,
+              "user": true,
+              "version": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 2,
+              "Value": 0,
+              "__name__": 3,
+              "arch": 4,
+              "board": 5,
+              "config": 6,
+              "exported_instance": 7,
+              "exported_job": 8,
+              "group": 9,
+              "instance": 10,
+              "job": 11,
+              "msg": 15,
+              "subarch": 18,
+              "target": 12,
+              "timestamp": 1,
+              "url": 16,
+              "url_display": 17,
+              "user": 13,
+              "version": 14
+            },
+            "renameByName": {
+              "Value": "Severity",
+              "arch": "Arch",
+              "board": "Board",
+              "config": "Config",
+              "job": "",
+              "msg": "Message",
+              "timestamp": "Timestamp",
+              "url": "Build Log"
+            }
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "target"
+          }
+        },
+        {
+          "id": "formatString",
+          "options": {
+            "outputFormat": "Upper Case",
+            "stringField": "config"
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Board": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Build Log": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Config": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Message": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Severity": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Timestamp": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Board (first)": "Board",
+              "Board (firstNotNull)": "Board",
+              "Build Log (first)": "Build Log",
+              "Build Log (last)": "",
+              "Config (first)": "Config",
+              "Config (firstNotNull)": "Config",
+              "Message (first)": "Message",
+              "Message (firstNotNull)": "Message",
+              "Severity (first)": "Severity",
+              "Severity (firstNotNull)": "Severity"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "3",
+          "value": "3"
+        },
+        "description": "For matching the Data Version in ingest-nuttx-builds",
+        "hide": 2,
+        "label": "Version",
+        "name": "version",
+        "query": "3",
+        "skipUrlSync": true,
+        "type": "constant"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({version=\"$version\"},arch)",
+        "includeAll": true,
+        "label": "Arch",
+        "name": "arch",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({version=\"$version\"},arch)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", version=\"$version\"},subarch)",
+        "includeAll": true,
+        "label": "SubArch",
+        "name": "subarch",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", version=\"$version\"},subarch)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "b-l072z-lrwan1",
+          "value": "b-l072z-lrwan1"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", version=\"$version\"},board)",
+        "includeAll": true,
+        "label": "Board",
+        "name": "board",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", version=\"$version\"},board)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "nsh",
+          "value": "nsh"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\", version=\"$version\"},config)",
+        "includeAll": true,
+        "label": "Config",
+        "name": "config",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", group=~\"$group\", board=~\"$board\", version=\"$version\"},config)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", version=\"$version\"},group)",
+        "includeAll": true,
+        "label": "Group",
+        "name": "group",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values({arch=~\"$arch\", subarch=~\"$subarch\", version=\"$version\"},group)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "baseFilters": [],
+        "datasource": {
+          "type": "prometheus",
+          "uid": "be2a71h9hs2dcb"
+        },
+        "filters": [],
+        "name": "Filters",
+        "type": "adhoc"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "NuttX Build History",
+  "uid": "fe2q876wubc3kc",
+  "version": 16,
+  "weekStart": ""
+}

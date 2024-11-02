@@ -1,0 +1,25 @@
+{
+  "id": 6,
+  "type": "text",
+  "title": "",
+  "gridPos": {
+    "x": 0,
+    "y": 0,
+    "h": 2,
+    "w": 24
+  },
+  "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+  },
+  "pluginVersion": "11.3.0-pre",
+  "options": {
+    "mode": "markdown",
+    "code": {
+      "language": "plaintext",
+      "showLineNumbers": false,
+      "showMiniMap": false
+    },
+    "content": "[__See the NuttX Build History__](/d/fe2q876wubc3kc/nuttx-build-history?from=now-2d&to=now&timezone=browser&var-arch=$__all&var-subarch=$__all&var-board=b-l072z-lrwan1&var-config=nsh&var-group=$__all&var-Filters=)"
+  }
+}

@@ -32,6 +32,31 @@
   "links": [],
   "panels": [
     {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "[__See the NuttX Build History__](/d/fe2q876wubc3kc/nuttx-build-history?from=now-2d&to=now&timezone=browser&var-arch=$__all&var-subarch=$__all&var-board=b-l072z-lrwan1&var-config=nsh&var-group=$__all&var-Filters=)",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.3.0-pre",
+      "title": "",
+      "type": "text"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "be2a71h9hs2dcb"
@@ -75,9 +100,15 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       },
       "id": 3,
+      "links": [
+        {
+          "title": "See the NuttX Build History",
+          "url": "/d/fe2q876wubc3kc/nuttx-build-history?from=now-2d&to=now&timezone=browser&var-arch=$__all&var-subarch=$__all&var-board=b-l072z-lrwan1&var-config=nsh&var-group=$__all&var-Filters="
+        }
+      ],
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -353,7 +384,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "id": 4,
       "options": {
@@ -587,7 +618,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 21
       },
       "id": 5,
       "options": {
@@ -868,6 +899,6 @@
   "timezone": "browser",
   "title": "Build Logs from NuttX Build Farm",
   "uid": "fe2bqg6uk7nr4a",
-  "version": 114,
+  "version": 116,
   "weekStart": ""
 }

@@ -4,7 +4,7 @@
   "title": "Highlights of Errors / Warnings",
   "gridPos": {
     "x": 0,
-    "y": 0,
+    "y": 2,
     "h": 9,
     "w": 24
   },
@@ -211,5 +211,11 @@
     "text": {
       "titleSize": 100
     }
-  }
+  },
+  "links": [
+    {
+      "title": "See the NuttX Build History",
+      "url": "/d/fe2q876wubc3kc/nuttx-build-history?from=now-2d&to=now&timezone=browser&var-arch=$__all&var-subarch=$__all&var-board=b-l072z-lrwan1&var-config=nsh&var-group=$__all&var-Filters="
+    }
+  ]
 }
