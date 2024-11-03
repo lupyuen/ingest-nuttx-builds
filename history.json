@@ -120,29 +120,34 @@
             "value": 176
           }
         ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "NuttX Hash"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 104
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Apps Hash"
+        },
+        "properties": [
+          {
+            "id": "custom.width",
+            "value": 96
+          }
+        ]
       }
     ]
   },
   "transformations": [
-    {
-      "disabled": true,
-      "id": "filterByValue",
-      "options": {
-        "filters": [
-          {
-            "config": {
-              "id": "lowerOrEqual",
-              "options": {
-                "value": "0.5"
-              }
-            },
-            "fieldName": "Value"
-          }
-        ],
-        "match": "any",
-        "type": "include"
-      }
-    },
     {
       "id": "labelsToFields",
       "options": {
@@ -210,8 +215,8 @@
     {
       "id": "formatString",
       "options": {
-        "outputFormat": "Upper Case",
-        "stringField": "target"
+        "stringField": "Timestamp",
+        "outputFormat": "Lower Case"
       }
     },
     {
@@ -258,6 +263,18 @@
           "Timestamp": {
             "aggregations": [],
             "operation": "groupby"
+          },
+          "apps_hash": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
+          },
+          "nuttx_hash": {
+            "aggregations": [
+              "first"
+            ],
+            "operation": "aggregate"
           }
         }
       }
@@ -266,8 +283,16 @@
       "id": "organize",
       "options": {
         "excludeByName": {},
-        "includeByName": {},
-        "indexByName": {},
+        "indexByName": {
+          "Timestamp": 0,
+          "Severity (first)": 1,
+          "Board (first)": 2,
+          "Config (first)": 3,
+          "nuttx_hash (first)": 4,
+          "apps_hash (first)": 5,
+          "Message (first)": 6,
+          "Build Log (first)": 7
+        },
         "renameByName": {
           "Board (first)": "Board",
           "Board (firstNotNull)": "Board",
@@ -278,8 +303,11 @@
           "Message (first)": "Message",
           "Message (firstNotNull)": "Message",
           "Severity (first)": "Severity",
-          "Severity (firstNotNull)": "Severity"
-        }
+          "Severity (firstNotNull)": "Severity",
+          "apps_hash (first)": "Apps Hash",
+          "nuttx_hash (first)": "NuttX Hash"
+        },
+        "includeByName": {}
       }
     }
   ],
@@ -321,8 +349,8 @@
     },
     "sortBy": [
       {
-        "desc": true,
-        "displayName": "Timestamp"
+        "displayName": "Timestamp",
+        "desc": true
       }
     ]
   }

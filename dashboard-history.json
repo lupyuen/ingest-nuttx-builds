@@ -148,6 +148,30 @@
                 "value": 176
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "NuttX Hash"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 104
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Apps Hash"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
           }
         ]
       },
@@ -199,25 +223,6 @@
       ],
       "title": "Build History (Select a board and config above)",
       "transformations": [
-        {
-          "disabled": true,
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "lowerOrEqual",
-                  "options": {
-                    "value": "0.5"
-                  }
-                },
-                "fieldName": "Value"
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
         {
           "id": "labelsToFields",
           "options": {
@@ -285,8 +290,8 @@
         {
           "id": "formatString",
           "options": {
-            "outputFormat": "Upper Case",
-            "stringField": "target"
+            "outputFormat": "Lower Case",
+            "stringField": "Timestamp"
           }
         },
         {
@@ -333,6 +338,18 @@
               "Timestamp": {
                 "aggregations": [],
                 "operation": "groupby"
+              },
+              "apps_hash": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "nuttx_hash": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
               }
             }
           }
@@ -342,7 +359,16 @@
           "options": {
             "excludeByName": {},
             "includeByName": {},
-            "indexByName": {},
+            "indexByName": {
+              "Board (first)": 2,
+              "Build Log (first)": 7,
+              "Config (first)": 3,
+              "Message (first)": 6,
+              "Severity (first)": 1,
+              "Timestamp": 0,
+              "apps_hash (first)": 5,
+              "nuttx_hash (first)": 4
+            },
             "renameByName": {
               "Board (first)": "Board",
               "Board (firstNotNull)": "Board",
@@ -353,7 +379,9 @@
               "Message (first)": "Message",
               "Message (firstNotNull)": "Message",
               "Severity (first)": "Severity",
-              "Severity (firstNotNull)": "Severity"
+              "Severity (firstNotNull)": "Severity",
+              "apps_hash (first)": "Apps Hash",
+              "nuttx_hash (first)": "NuttX Hash"
             }
           }
         }
@@ -499,6 +527,6 @@
   "timezone": "browser",
   "title": "NuttX Build History",
   "uid": "fe2q876wubc3kc",
-  "version": 16,
+  "version": 21,
   "weekStart": ""
 }
