@@ -303,9 +303,9 @@ async fn process_target(
         let caps = re.captures(line);
         if caps.is_some() { continue; }
 
-        // Remember the Error / Waning
+        // Remember the first 50 Errors / Warnings
         println!("*** Msg: {line}");
-        if msg.len() < 20 { msg.push(line); }
+        if msg.len() < 50 { msg.push(line); }
     }
 
     // Compute the Build Score based on Error vs Warning
