@@ -112,7 +112,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Description contains: [arm-14] CI Log for nuttx @ 7f84a64109f94787d92c2f44465e43fde6f3d28f / nuttx-apps @ d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288
         // Extract the NuttX Hash and the Apps Hash
-
+        let mut nuttx_hash: Option<&str> = None;
+        let mut apps_hash: Option<&str> = None;
+        let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
+        let caps = re.captures(&description);
+        if let Some(caps) = caps {
+            let nuttx = caps.get(1).unwrap().as_str();
+            let apps = caps.get(2).unwrap().as_str();
+            nuttx_hash = Some(nuttx);  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+            apps_hash = Some(apps);  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
+        } else {
+            println!("*** Missing Git Hash: {}", description);
+        }
+        println!("nuttx_hash={nuttx_hash:?}");
+        println!("apps_hash={apps_hash:?}");
+    
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
         // println!("Status: {}", res.status());
@@ -123,6 +137,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Process the Build Log
         process_log(
             &body, &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
+            nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
 
@@ -148,6 +163,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     let log = fs::read_to_string(&args.file).unwrap();
     process_log(
         &log, &args.user, &args.defconfig, &args.group, "", filename,
+        None, None,
         Some(&args.repo), Some(&args.run_id), Some(&args.job_id), Some(&args.step)
     ).await?;
     Ok(())
@@ -172,6 +188,8 @@ async fn process_log(
     group: &str,  // "arm-04"
     url: &str,  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
     filename: &str,  // "ci-arm-04.log"
+    nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+    apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
     repo: Option<&str>,  // "nuttx"
     run_id: Option<&str>,  // "11603561928"
     job_id: Option<&str>,  // "32310817851"
@@ -188,6 +206,7 @@ async fn process_log(
                 let target = &lines[l..linenum];
                 process_target(
                     target, user, defconfig, group, url, filename,
+                    nuttx_hash, apps_hash,
                     repo, run_id, job_id, step, l
                 ).await?;
             }
@@ -214,6 +233,8 @@ async fn process_target(
     group: &str,  // "arm-04"
     url: &str,  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
     filename: &str,  // "ci-arm-04.log"
+    nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+    apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
     repo: Option<&str>,  // "nuttx"
     run_id: Option<&str>,  // "11603561928"
     job_id: Option<&str>,  // "32310817851"
@@ -312,6 +333,8 @@ async fn process_target(
         group,
         &target,
         &url,
+        nuttx_hash,
+        apps_hash,
         &msg
     ).await?;
     Ok(())
@@ -331,6 +354,8 @@ async fn post_to_pushgateway(
     group: &str,
     target: &str,
     url: &str,
+    nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+    apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
     msg: &Vec<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
@@ -356,11 +381,21 @@ async fn post_to_pushgateway(
     let url_display =
         if msg.is_empty() { "".into() }
         else { url.replace("https://", "") };
+
+    // Compose the NuttX and Apps Hashes    
+    let nuttx_hash_opt=
+        if let Some(h) = nuttx_hash { format!(r#", nuttx_hash="{h}""#) }
+        else { "".into() };
+    let apps_hash_opt=
+        if let Some(h) = apps_hash { format!(r#", apps_hash="{h}""#) }
+        else { "".into() };
+
+    // Compose the Pushgateway Metric
     let body = format!(
 r##"
 # TYPE build_score gauge
 # HELP build_score 1.0 for successful build, 0.0 for failed build
-build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt} }} {build_score}
+build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt} }} {build_score}
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
@@ -374,6 +409,7 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
     if !res.status().is_success() {
         println!("*** Pushgateway Failed");
     }
+    // sleep(Duration::from_secs(10));
     Ok(())
 }
 
