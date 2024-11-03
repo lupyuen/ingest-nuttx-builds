@@ -28,6 +28,9 @@ cargo run -- \
 
 ## Ingest logs from GitHub Actions
 ./github.sh
+
+## Or: Start GitHub Actions Build, wait to complete then ingest logs
+./build-github-and-ingest.sh
 ```
 
 To install Grafana and Prometheus...
