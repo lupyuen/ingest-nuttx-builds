@@ -303,9 +303,9 @@ async fn process_target(
         let caps = re.captures(line);
         if caps.is_some() { continue; }
 
-        // Remember the first 10 Errors / Warnings
+        // Remember the Errors / Warnings
         println!("*** Msg: {line}");
-        if msg.len() < 10 { msg.push(line); }
+        msg.push(line);
     }
 
     // Compute the Build Score based on Error vs Warning
@@ -380,9 +380,10 @@ async fn post_to_pushgateway(
         else { group };
 
     // Join the messages
-    let msg_join = msg
+    let mut msg_join = msg
         .join(" \\n ")
         .replace("\"", "\\\"");
+    msg_join.truncate(512);
     let msg_opt =
         if msg.is_empty() { "".into() }
         else { format!(", msg=\"{msg_join}\"") };
