@@ -297,7 +297,7 @@ async fn process_target(
 
         // Remember the Error / Waning
         println!("*** Msg: {line}");
-        msg.push(line);
+        if msg.len() < 20 { msg.push(line); }
     }
 
     // Compute the Build Score based on Error vs Warning
