@@ -58,8 +58,8 @@ function ingest_log {
     --repo $repo \
     --defconfig $defconfig \
     --file $pathname \
-    --nuttx_hash $nuttx_hash \
-    --apps_hash $apps_hash \
+    --nuttx-hash $nuttx_hash \
+    --apps-hash $apps_hash \
     --group $group \
     --run-id $run_id \
     --job-id $job_id \
