@@ -31,6 +31,12 @@ struct Args {
     /// For GitHub Actions: Pathname of the downloaded Run Log
     #[arg(long, default_value = "")]
     file: String,
+    /// For GitHub Actions: Commit Hash of the NuttX Repo (`7f84a64109f94787d92c2f44465e43fde6f3d28f`)
+    #[arg(long, default_value = "")]
+    nuttx_hash: String,
+    /// For GitHub Actions: Commit Hash of the NuttX Apps Repo (`d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288``)
+    #[arg(long, default_value = "")]
+    apps_hash: String,
     /// For GitHub Actions: Target Group of the CI Build (`arm-01`)
     #[arg(long, default_value = "")]
     group: String,
@@ -153,6 +159,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     assert_ne!(&args.repo, "");
     assert_ne!(&args.file, "");
+    assert_ne!(&args.nuttx_hash, "");
+    assert_ne!(&args.apps_hash, "");
     assert_ne!(&args.group, "");
     assert_ne!(&args.run_id, "");
     assert_ne!(&args.job_id, "");
@@ -163,7 +171,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     let log = fs::read_to_string(&args.file).unwrap();
     process_log(
         &log, &args.user, &args.defconfig, &args.group, "", filename,
-        None, None,
+        Some(&args.nuttx_hash), Some(&args.apps_hash),
         Some(&args.repo), Some(&args.run_id), Some(&args.job_id), Some(&args.step)
     ).await?;
     Ok(())

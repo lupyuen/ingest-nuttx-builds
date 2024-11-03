@@ -58,6 +58,8 @@ function ingest_log {
     --repo $repo \
     --defconfig $defconfig \
     --file $pathname \
+    --nuttx_hash $nuttx_hash \
+    --apps_hash $apps_hash \
     --group $group \
     --run-id $run_id \
     --job-id $job_id \
@@ -108,6 +110,32 @@ for (( ; ; )); do
   ## For Testing
   ## run_id=11603561928
   ## job_id=32310817851
+
+  ## Find the Second-Last Commit Hash for NuttX Mirror Repo
+  ## Because the Last Commit is always "Enable macOS and Windows Builds"
+  ## TODO: This might change
+  tmp_path=/tmp/ingest-nuttx-builds-nuttx
+  rm -rf $tmp_path
+  mkdir $tmp_path
+  pushd $tmp_path
+  git clone https://github.com/NuttX/nuttx
+  cd nuttx
+  last_two_commits=$(git log -2 --pretty=format:"%H")
+  echo last_two_commits=$last_two_commits
+  nuttx_hash=$(echo $last_two_commits | cut -d ' ' -f 2)
+  echo nuttx_hash=$nuttx_hash
+  popd
+
+  ## Find the Last Commit Hash for NuttX Apps Repo
+  ## TODO: NuttX Apps Repo may have changed when we run this. Find the hash from the GitHub Log instead.
+  rm -rf $tmp_path
+  mkdir $tmp_path
+  pushd $tmp_path
+  git clone https://github.com/apache/nuttx-apps
+  cd nuttx-apps
+  apps_hash=$(git log -1 --pretty=format:"%H")
+  echo apps_hash=$apps_hash
+  popd
 
   ## Download the Run Logs
   ## https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#download-workflow-run-logs
