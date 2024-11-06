@@ -1,6 +1,10 @@
+![Optimising the Continuous Integration for Apache NuttX RTOS](https://lupyuen.github.io/images/ci3-title.jpg)
+
 # Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway
 
 Read the article...
+
+- ["Optimising the Continuous Integration for Apache NuttX RTOS"](https://github.com/lupyuen/lupyuen.github.io/blob/master/src/ci3.md)
 
 - ["Your very own Build Farm for Apache NuttX RTOS"](https://lupyuen.codeberg.page/articles/ci2.html)
 
