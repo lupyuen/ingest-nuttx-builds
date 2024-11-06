@@ -10,12 +10,15 @@ set -x  #  Echo commands
 
 user=NuttX
 repo=nuttx
-step=7  ## TODO: Step may change
+linux_step=7  ## TODO: Step may change for Linux Builds
+msys2_step=9  ## TODO: Step may change for msys2 Builds
 
 function ingest_log {
   ## Fetch the Jobs for the Run ID. Get the Job ID for the Job Name.
-  local group=$1 ## "arm-01"
-  local job_name="Linux ($group)"
+  local os=$1 ## "Linux" or "msys2"
+  local step=$2 ## "7" or "9"
+  local group=$3 ## "arm-01"
+  local job_name="$os ($group)"
   local job_id=$(
     curl -L \
       -H "Accept: application/vnd.github+json" \
@@ -34,10 +37,12 @@ function ingest_log {
   fi
   sleep 10
 
+  ## log_file looks like /tmp/ingest-nuttx-builds/Linux (arm-01)/7_Run builds.txt
+  ## Or /tmp/ingest-nuttx-builds/msys2 (msys2)/9_Run Builds.txt
   ## filename looks like ci-arm-01.log
   ## pathname looks like /tmp/ingest-nuttx-builds/ci-arm-01.log
   ## url looks like https://github.com/NuttX/nuttx/actions/runs/11603561928/job/32310817851#step:7:83
-  local log_file="$tmp_path/Linux ($group)/${step}_Run builds.txt"
+  local log_file="$tmp_path/$os ($group)/${step}_Run builds.txt"
   local filename="ci-$group.log"
   local pathname="$tmp_path/$filename"
 
@@ -155,7 +160,7 @@ for (( ; ; )); do
   popd
 
   ## For All Target Groups
-  ## TODO: Handle macOS, msvc, msys2 when the warnings have been cleaned up
+  ## TODO: Handle macOS when the warnings have been cleaned up
   for group in \
     arm-01 arm-02 arm-03 arm-04 \
     arm-05 arm-06 arm-07 arm-08 \
@@ -167,10 +172,15 @@ for (( ; ; )); do
     risc-v-05 risc-v-06 \
     sim-01 sim-02 sim-03 \
     x86_64-01 \
-    xtensa-01 xtensa-02
+    xtensa-01 xtensa-02 \
+    msys2
   do
     ## Ingest the Log File
-    ingest_log $group
+    if [[ "$group" == "msys2" ]]; then
+      ingest_log "msys2" $msys2_step $group
+    else
+      ingest_log "Linux" $linux_step $group
+    fi
   done
 
   ## Run once only
