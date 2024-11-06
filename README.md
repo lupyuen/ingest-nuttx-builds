@@ -2,7 +2,7 @@
 
 # Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway
 
-Read the article...
+Read the articles...
 
 - ["Optimising the Continuous Integration for Apache NuttX RTOS"](https://github.com/lupyuen/lupyuen.github.io/blob/master/src/ci3.md)
 
