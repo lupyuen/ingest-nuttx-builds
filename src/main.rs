@@ -208,7 +208,8 @@ async fn process_log(
     let mut target_linenum: Option<usize> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
     for (linenum, line) in lines.into_iter().enumerate() {
-        if line.starts_with(DELIMITER) {
+        // Not a delimiter: ====== test session starts
+        if line.starts_with(DELIMITER) && !line.contains(" ") {
             // Process the target
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
