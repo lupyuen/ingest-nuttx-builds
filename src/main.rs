@@ -310,8 +310,14 @@ async fn process_target(
     }
 
     // Compute the Build Score based on Error vs Warning
-    let contains_error = msg.join(" ").to_lowercase().contains("error");
-    let contains_warning = msg.join(" ").to_lowercase().contains("warning");
+    // Not an error: "test_ltp_interfaces_aio_error_1_1 PASSED"
+    let contains_error = msg.join(" ")
+        .replace("aio_error", "aio_notused")
+        .to_lowercase()
+        .contains("error");
+    let contains_warning = msg.join(" ")
+        .to_lowercase()
+        .contains("warning");
     let build_score =
         if msg.is_empty() { 1.0 }
         else if contains_error { 0.0 }
