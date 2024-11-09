@@ -3,6 +3,12 @@
 //! Process each Build Target
 //! Post to Prometheus Pushgateway
 
+// TODO: macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
+// To get the UTC Time Difference:
+// Search for "utc_time=2024-11-09T03:51:42 \n local_time=2024-11-09T11:51:42"
+
+// TODO: Is this macOS? Search for "darwin.sh"
+
 use std::{
     collections::HashSet, 
     fs::{self, File}, 
