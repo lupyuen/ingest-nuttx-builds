@@ -57,8 +57,27 @@ struct Args {
     step: String,
 }
 
+use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::format::ParseError;
+use std::ops::Sub;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ////
+    let utc_timestamp = format!("{}+00:00", "2024-11-09T03:51:42");
+    let utc_datetime = DateTime::parse_from_rfc3339(&utc_timestamp).unwrap();
+    let local_timestamp = format!("{}+00:00", "2024-11-09T11:51:42");
+    let local_datetime = DateTime::parse_from_rfc3339(&local_timestamp).unwrap();
+    let timediff = local_datetime.sub(utc_datetime);
+    println!("timediff={timediff}, numhours={}", timediff.num_hours());
+
+    let timestamp = format!("{}+00:00", "2024-11-09T08:12:34");
+    let datetime = DateTime::parse_from_rfc3339(&timestamp).unwrap();
+    let datetime_adjust = datetime.sub(timediff);
+    println!("datetime_adjust={datetime_adjust}");
+    sleep(Duration::from_secs(60));
+    ////
+
     // Init the Logger and Command-Line Args
     env_logger::init();
     let args = Args::parse();

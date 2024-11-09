@@ -15,21 +15,21 @@ for (( ; ; )); do
   cargo run -- \
     --user lvanasse \
     --defconfig /tmp/defconfig.txt \
-    | tr -d '\\033'
+    | tr -d '\033'
   date ; sleep 300
 
   ## Ingest logs from nuttxpr GitHub Gist. Remove special characters.
   cargo run -- \
     --user nuttxpr \
     --defconfig /tmp/defconfig.txt \
-    | tr -d '\\033'
+    | tr -d '\033'
   date ; sleep 300
 
   ## Ingest logs from jerpelea GitHub Gist. Remove special characters.
   cargo run -- \
     --user jerpelea \
     --defconfig /tmp/defconfig.txt \
-    | tr -d '\\033'
+    | tr -d '\033'
   date ; sleep 300
 
   ## Ingest logs from GitHub Actions
