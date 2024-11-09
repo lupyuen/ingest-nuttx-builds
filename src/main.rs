@@ -57,8 +57,7 @@ struct Args {
     step: String,
 }
 
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
-use chrono::format::ParseError;
+use chrono::DateTime;
 use std::ops::Sub;
 
 #[tokio::main]
@@ -75,6 +74,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let datetime = DateTime::parse_from_rfc3339(&timestamp).unwrap();
     let datetime_adjust = datetime.sub(timediff);
     println!("datetime_adjust={datetime_adjust}");
+    let timestamp_adjust = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
+    println!("timestamp_adjust={timestamp_adjust}");
     sleep(Duration::from_secs(60));
     ////
 
