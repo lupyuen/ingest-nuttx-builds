@@ -3,12 +3,6 @@
 //! Process each Build Target
 //! Post to Prometheus Pushgateway
 
-// TODO: macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
-// To get the UTC Time Difference:
-// Search for "utc_time=2024-11-09T03:51:42 \n local_time=2024-11-09T11:51:42"
-
-// TODO: Is this macOS? Search for "darwin.sh"
-
 use std::{
     collections::HashSet, 
     fs::{self, File}, 
@@ -61,23 +55,6 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ////
-    let utc_timestamp = format!("{}+00:00", "2024-11-09T03:51:42");
-    let utc_datetime = DateTime::parse_from_rfc3339(&utc_timestamp).unwrap();
-    let local_timestamp = format!("{}+00:00", "2024-11-09T11:51:42");
-    let local_datetime = DateTime::parse_from_rfc3339(&local_timestamp).unwrap();
-    let timediff = local_datetime.sub(utc_datetime);
-    println!("timediff={timediff}, numhours={}", timediff.num_hours());
-
-    let timestamp = format!("{}+00:00", "2024-11-09T08:12:34");
-    let datetime = DateTime::parse_from_rfc3339(&timestamp).unwrap();
-    let datetime_adjust = datetime.sub(timediff);
-    println!("datetime_adjust={datetime_adjust}");
-    let timestamp_adjust = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
-    println!("timestamp_adjust={timestamp_adjust}");
-    sleep(Duration::from_secs(60));
-    ////
-
     // Init the Logger and Command-Line Args
     env_logger::init();
     let args = Args::parse();
@@ -231,6 +208,8 @@ async fn process_log(
     // Look for the delimiter
     const DELIMITER: &str = "==========";
     let mut target_linenum: Option<usize> = None;
+    let mut utc_time: Option<&str> = None;
+    let mut local_time: Option<&str> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
     for (linenum, line) in lines.into_iter().enumerate() {
         // Not a delimiter: ====== test session starts
@@ -240,11 +219,19 @@ async fn process_log(
                 let target = &lines[l..linenum];
                 process_target(
                     target, user, defconfig, group, url, filename,
-                    nuttx_hash, apps_hash,
+                    nuttx_hash, apps_hash, utc_time, local_time,
                     repo, run_id, job_id, step, l
                 ).await?;
             }
             target_linenum = Some(linenum + 1);
+
+        // macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
+        // To get the UTC Time Difference:
+        // Search for "utc_time=2024-11-09T03:51:42" and "local_time=2024-11-09T11:51:42"
+        } else if line.starts_with("utc_time=") {
+            utc_time = Some(&line[9..]);
+        } else if line.starts_with("local_time=") {
+            local_time = Some(&line[11..]); 
         }
     }
     Ok(())
@@ -269,6 +256,8 @@ async fn process_target(
     filename: &str,  // "ci-arm-04.log"
     nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
     apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
+    utc_time: Option<&str>,  // "2024-11-09T03:51:42"
+    local_time: Option<&str>,  // "2024-11-09T11:51:42"
     repo: Option<&str>,  // "nuttx"
     run_id: Option<&str>,  // "11603561928"
     job_id: Option<&str>,  // "32310817851"
@@ -296,12 +285,31 @@ async fn process_target(
     l += 1;
 
     // Read the Timestamp
-    let timestamp = lines[l]
+    let mut timestamp = lines[l]
         .replace(" ", "T");
     println!("timestamp={timestamp}");
     l += 1;
 
-    // TODO: macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
+    // macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
+    if let Some(utc_time) = utc_time {
+        // Compute the Time Difference
+        let local_time = local_time.unwrap();
+        let utc_timestamp = format!("{}+00:00", utc_time);
+        let local_timestamp = format!("{}+00:00", local_time);
+        let utc_datetime = DateTime::parse_from_rfc3339(&utc_timestamp).unwrap();
+        let local_datetime = DateTime::parse_from_rfc3339(&local_timestamp).unwrap();
+        let timediff = local_datetime.sub(utc_datetime);
+        println!("utc_time={utc_time}, local_time={local_time}, timediff={timediff}, numhours={}", timediff.num_hours());
+
+        // Adjust the Timestamp
+        let timestamp_before = format!("{}+00:00", timestamp);
+        let datetime = DateTime::parse_from_rfc3339(&timestamp_before).unwrap();
+        let datetime_adjust = datetime.sub(timediff);
+        println!("datetime_adjust={datetime_adjust}");
+        timestamp = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
+        println!("adjusted timestamp={timestamp}");
+        sleep(Duration::from_secs(60));
+    }
 
     // To Identify Errors / Warnings: Skip the known lines
     let mut msg: Vec<&str> = vec![];
