@@ -13,11 +13,13 @@ use std::{
     collections::HashSet, 
     fs::{self, File}, 
     io::{BufRead, BufReader}, 
+    ops::Sub,
     path::Path,
     thread::sleep, 
     time::Duration, 
     vec
 };
+use chrono::DateTime;
 use clap::Parser;
 use regex::Regex;
 
@@ -56,9 +58,6 @@ struct Args {
     #[arg(long, default_value = "")]
     step: String,
 }
-
-use chrono::DateTime;
-use std::ops::Sub;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
