@@ -282,6 +282,8 @@ async fn process_target(
     println!("timestamp={timestamp}");
     l += 1;
 
+    // TODO: macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
+
     // To Identify Errors / Warnings: Skip the known lines
     let mut msg: Vec<&str> = vec![];
     let lines = &lines[l..];
