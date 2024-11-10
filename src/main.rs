@@ -307,7 +307,6 @@ async fn process_target(
         let datetime_adjust = datetime.sub(timediff);
         timestamp = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
         println!("adjusted timestamp={timestamp}");
-        sleep(Duration::from_secs(1));
     }
 
     // To Identify Errors / Warnings: Skip the known lines
