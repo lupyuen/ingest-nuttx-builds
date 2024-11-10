@@ -307,7 +307,7 @@ async fn process_target(
         let datetime_adjust = datetime.sub(timediff);
         timestamp = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
         println!("adjusted timestamp={timestamp}");
-        sleep(Duration::from_secs(10));
+        sleep(Duration::from_secs(1));
     }
 
     // To Identify Errors / Warnings: Skip the known lines
@@ -343,10 +343,15 @@ async fn process_target(
         msg.push(line);
     }
 
-    // Compute the Build Score based on Error vs Warning
-    // Not an error: "test_ltp_interfaces_aio_error_1_1 PASSED"
+    // Compute the Build Score based on Error vs Warning. Not an error:
+    // "test_ltp_interfaces_aio_error_1_1 PASSED"
+    // "lua-5.4.0/testes/errors.lua"
+    // "nuttx-export-12.7.0/include/libcxx/__system_error"
     let contains_error = msg.join(" ")
-        .replace("aio_error", "aio_notused")
+        .replace("aio_error", "aio_e_r_r_o_r")
+        .replace("errors.lua", "e_r_r_o_r_s.lua")
+        .replace("_error", "_e_r_r_o_r")
+        .replace("error_", "e_r_r_o_r_")
         .to_lowercase()
         .contains("error");
     let contains_warning = msg.join(" ")
