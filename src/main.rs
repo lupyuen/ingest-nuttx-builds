@@ -305,10 +305,9 @@ async fn process_target(
         let timestamp_before = format!("{}+00:00", timestamp);
         let datetime = DateTime::parse_from_rfc3339(&timestamp_before).unwrap();
         let datetime_adjust = datetime.sub(timediff);
-        println!("datetime_adjust={datetime_adjust}");
         timestamp = datetime_adjust.to_rfc3339().as_str()[0..19].to_string();
         println!("adjusted timestamp={timestamp}");
-        sleep(Duration::from_secs(60));
+        sleep(Duration::from_secs(10));
     }
 
     // To Identify Errors / Warnings: Skip the known lines
@@ -461,7 +460,7 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
         println!("*** Pushgateway Failed");
         sleep(Duration::from_secs(1));
     }
-    // sleep(Duration::from_secs(10));
+    // sleep(Duration::from_secs(30));
     Ok(())
 }
 
