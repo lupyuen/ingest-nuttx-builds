@@ -4,13 +4,15 @@
 set -x  #  Echo commands
 
 for (( ; ; )); do
-  clear && tail -f /opt/homebrew/var/log/grafana/grafana.log \
-    | grep --line-buffered "logger=context " \
-    | grep --line-buffered -v "path=/api/frontend-metrics " \
-    | grep --line-buffered -v "path=/api/live/ws " \
-    | grep --line-buffered -v "path=/api/plugins/grafana-lokiexplore-app/settings " \
-    | grep --line-buffered -v "path=/api/user/auth-tokens/rotate " \
-    | grep --line-buffered -v "path=/favicon.ico " \
+  clear
+  tail -f /opt/homebrew/var/log/grafana/grafana.log \
+    | grep --line-buffered 'logger=context ' \
+    | grep --line-buffered -v ' path=/api/frontend-metrics ' \
+    | grep --line-buffered -v ' path=/api/live/ws ' \
+    | grep --line-buffered -v ' path=/api/plugins/grafana-lokiexplore-app/settings ' \
+    | grep --line-buffered -v ' path=/api/user/auth-tokens/rotate ' \
+    | grep --line-buffered -v ' path=/favicon.ico ' \
+    | grep --line-buffered -v ' remote_addr=\[::1\] ' \
     | cut -d ' ' -f 9-15 \
     &
 
