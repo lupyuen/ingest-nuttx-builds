@@ -330,7 +330,9 @@ async fn process_target(
             line.starts_with("find: 'boards/") ||  // "find: 'boards/risc-v/q[0-d]*': No such file or directory"
             line.starts_with("|        ^~~~~~~") ||  // `warning "FPU test not built; Only available in the flat build (CONFIG_BUILD_FLAT)"`
             line.contains("FPU test not built") ||
-            line.starts_with("a nuttx-export-")  // "a nuttx-export-12.7.0/tools/incdir.c"
+            line.starts_with("a nuttx-export-") ||  // "a nuttx-export-12.7.0/tools/incdir.c"
+            line.contains(" PASSED") ||  // CI Test: "test_hello PASSED"
+            line.contains(" SKIPPED")  // CI Test: "test_mm SKIPPED"
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
@@ -354,6 +356,9 @@ async fn process_target(
         .replace("error_", "e_r_r_o_r_")
         .to_lowercase()
         .contains("error");
+    let contains_error = contains_error ||
+        msg.join(" ")
+        .contains(" FAILED");  // CI Test: "test_helloxx FAILED"
     let contains_warning = msg.join(" ")
         .to_lowercase()
         .contains("warning");
