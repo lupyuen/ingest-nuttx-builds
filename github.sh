@@ -35,7 +35,7 @@ function ingest_log {
     sleep 10
     return
   fi
-  sleep 10
+  sleep 1
 
   ## log_file looks like /tmp/ingest-nuttx-builds/Linux (arm-01)/7_Run builds.txt
   ## Or /tmp/ingest-nuttx-builds/msys2 (msys2)/9_Run Builds.txt
