@@ -4,6 +4,8 @@
 
 Read the articles...
 
+- ["Continuous Integration Dashboard for Apache NuttX RTOS"](https://github.com/lupyuen/lupyuen.github.io/blob/master/src/ci4.md)
+
 - ["Optimising the Continuous Integration for Apache NuttX RTOS"](https://lupyuen.codeberg.page/articles/ci3.html)
 
 - ["Your very own Build Farm for Apache NuttX RTOS"](https://lupyuen.codeberg.page/articles/ci2.html)
