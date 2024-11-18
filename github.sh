@@ -92,7 +92,7 @@ for (( ; ; )); do
   echo run_id=$run_id
   if [[ "$run_id" == "" ]]; then
     echo No completed runs for today, waiting...
-    sleep 300
+    date ; sleep 300
     continue
   fi
 
@@ -108,7 +108,7 @@ for (( ; ; )); do
   echo latest_run_id=$latest_run_id
   if [[ "$run_id" != "$latest_run_id" ]]; then
     echo Latest run has not completed, waiting...
-    sleep 300
+    date ; sleep 300
     continue
   fi
 
