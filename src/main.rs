@@ -314,7 +314,8 @@ async fn process_target(
     let lines = &lines[l..];
     for line in lines {
         let line = line.trim();
-        if line.starts_with("----------") ||
+        if line.len() == 0 ||
+            line.starts_with("----------") ||
             line.starts_with("-- ") ||  // "-- Build type:"
             line.starts_with("Cleaning") ||
             line.starts_with("Configuring") ||
@@ -332,7 +333,12 @@ async fn process_target(
             line.contains("FPU test not built") ||
             line.starts_with("a nuttx-export-") ||  // "a nuttx-export-12.7.0/tools/incdir.c"
             line.contains(" PASSED") ||  // CI Test: "test_hello PASSED"
-            line.contains(" SKIPPED")  // CI Test: "test_mm SKIPPED"
+            line.contains(" SKIPPED") ||  // CI Test: "test_mm SKIPPED"
+            line.contains("On branch master") ||  // "On branch master"
+            line.contains("Your branch is up to date") ||  // "Your branch is up to date with 'origin/master'"
+            line.contains("Changes not staged for commit") ||  // "Changes not staged for commit:"
+            line.contains("git add <file>") ||  // "(use "git add <file>..." to update what will be committed)"
+            line.contains("git restore <file>")  // "(use "git restore <file>..." to discard changes in working directory)"
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
