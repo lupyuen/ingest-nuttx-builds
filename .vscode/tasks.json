@@ -7,7 +7,7 @@
             "label": "Build",
             "type": "shell",
 
-            "command": "echo ./run.sh && . $HOME/github-token.sh && find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt && cargo run -- --user nuttxmacos --defconfig /tmp/defconfig.txt | tr -d '\\033' ",
+            "command": "echo ./run.sh && . $HOME/github-token.sh && find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt && cargo run -- --user lvanasse --defconfig /tmp/defconfig.txt | tr -d '\\033' ",
 
             "problemMatcher": "$rustc",
             "group": {

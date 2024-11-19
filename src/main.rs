@@ -345,23 +345,42 @@ async fn process_target(
         msg.push(line);
     }
 
-    // Compute the Build Score based on Error vs Warning. Not an error:
+    // Not an error:
     // "test_ltp_interfaces_aio_error_1_1 PASSED"
     // "lua-5.4.0/testes/errors.lua"
     // "nuttx-export-12.7.0/include/libcxx/__system_error"
-    let contains_error = msg.join(" ")
+    let msg_join = msg.join(" ");
+    let contains_error = msg_join
         .replace("aio_error", "aio_e_r_r_o_r")
         .replace("errors.lua", "e_r_r_o_r_s.lua")
         .replace("_error", "_e_r_r_o_r")
         .replace("error_", "e_r_r_o_r_")
         .to_lowercase()
         .contains("error");
+
+    // Identify CI Test as Error: "test_helloxx FAILED"
     let contains_error = contains_error ||
-        msg.join(" ")
-        .contains(" FAILED");  // CI Test: "test_helloxx FAILED"
-    let contains_warning = msg.join(" ")
+        msg_join.contains(" FAILED");
+
+    // Given Board=sim, Config=rtptools
+    // Identify defconfig as Error: "modified:...boards/sim/sim/sim/configs/rtptools/defconfig"
+    let target_split = target.split(":").collect::<Vec<_>>();
+    let board = target_split[0];
+    let config = target_split[1];
+    let board_config = format!("/{board}/configs/{config}/defconfig");
+    let contains_error = contains_error ||
+    (
+        msg_join.contains(&"modified:") &&
+        msg_join.contains(&"boards/") &&
+        msg_join.contains(&board_config.as_str())
+    );
+
+    // Search for Warnings
+    let contains_warning = msg_join
         .to_lowercase()
         .contains("warning");
+
+    // Compute the Build Score based on Error vs Warning
     let build_score =
         if msg.is_empty() { 1.0 }
         else if contains_error { 0.0 }
