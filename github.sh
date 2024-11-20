@@ -8,6 +8,7 @@
 set -e  #  Exit when any command fails
 set -x  #  Echo commands
 
+run_id=$1  ## Optional: First Parameter is Run ID
 user=NuttX
 repo=nuttx
 linux_step=7  ## TODO: Step may change for Linux Builds
@@ -77,47 +78,46 @@ for (( ; ; )); do
   ## Generate the list of deconfigs
   defconfig=/tmp/defconfig-github.txt
   find $HOME/riscv/nuttx -name defconfig >$defconfig
-
-  ## Get the Latest Completed Run ID for today
   date=$(date -u +'%Y-%m-%d')
-  run_id=$(
-    gh run list \
-      --repo $user/$repo \
-      --limit 1 \
-      --created $date \
-      --status completed \
-      --json databaseId,name,displayTitle,conclusion \
-      --jq '.[].databaseId'
-  )
-  echo run_id=$run_id
+
+  ## If Run ID not specified as parameter...
   if [[ "$run_id" == "" ]]; then
-    echo No completed runs for today, waiting...
-    date ; sleep 300
-    continue
-  fi
+    ## Get the Latest Completed Run ID for today
+    run_id=$(
+      gh run list \
+        --repo $user/$repo \
+        --limit 1 \
+        --created $date \
+        --status completed \
+        --json databaseId,name,displayTitle,conclusion \
+        --jq '.[].databaseId'
+    )
+    echo run_id=$run_id
+    if [[ "$run_id" == "" ]]; then
+      echo No completed runs for today, waiting...
+      date ; sleep 300
+      continue
+    fi
 
-  ## Get the Latest Run ID for today. Check that it has completed.
-  latest_run_id=$(
-    gh run list \
-      --repo $user/$repo \
-      --limit 1 \
-      --created $date \
-      --json databaseId,name,displayTitle,conclusion \
-      --jq '.[].databaseId'
-  )
-  echo latest_run_id=$latest_run_id
-  if [[ "$run_id" != "$latest_run_id" ]]; then
-    echo Latest run has not completed, waiting...
-    date ; sleep 300
-    continue
+    ## Get the Latest Run ID for today. Check that it has completed.
+    latest_run_id=$(
+      gh run list \
+        --repo $user/$repo \
+        --limit 1 \
+        --created $date \
+        --json databaseId,name,displayTitle,conclusion \
+        --jq '.[].databaseId'
+    )
+    echo latest_run_id=$latest_run_id
+    if [[ "$run_id" != "$latest_run_id" ]]; then
+      echo Latest run has not completed, waiting...
+      date ; sleep 300
+      continue
+    fi
   fi
-
-  ## For Testing
-  ## run_id=11603561928
-  ## job_id=32310817851
 
   ## Find the Second-Last Commit Hash for NuttX Mirror Repo
-  ## Because the Last Commit is always "Enable macOS and Windows Builds"
+  ## Because the Last Commit is always "Enable macOS Builds"
   ## TODO: This might change
   tmp_path=/tmp/ingest-nuttx-builds-nuttx
   rm -rf $tmp_path
