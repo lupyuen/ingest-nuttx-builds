@@ -11,6 +11,13 @@ for (( ; ; )); do
   ## Find all defconfig files
   find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt
 
+  ## Ingest logs from nuttxlinux GitHub Gist. Remove special characters.
+  cargo run -- \
+    --user nuttxlinux \
+    --defconfig /tmp/defconfig.txt \
+    | tr -d '\033\007'
+  date ; sleep 300
+
   ## Ingest logs from nuttxmacos GitHub Gist. Remove special characters.
   cargo run -- \
     --user nuttxmacos \
