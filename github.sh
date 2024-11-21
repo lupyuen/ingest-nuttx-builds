@@ -110,6 +110,7 @@ for (( ; ; )); do
     )
     echo latest_run_id=$latest_run_id
     if [[ "$run_id" != "$latest_run_id" ]]; then
+      run_id=
       echo Latest run has not completed, waiting...
       date ; sleep 300
       continue
