@@ -1,4 +1,4 @@
-![Optimising the Continuous Integration for Apache NuttX RTOS](https://lupyuen.github.io/images/ci3-title.jpg)
+![Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway](https://lupyuen.github.io/images/ci4-flow.jpg)
 
 # Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway
 
