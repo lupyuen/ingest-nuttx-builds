@@ -525,7 +525,14 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
         println!("*** Pushgateway Failed");
         sleep(Duration::from_secs(1));
     }
-    // sleep(Duration::from_secs(30));
+
+    // For Build Rewind: Wait 20 seconds for Prometheus to scrape the metric from Pushgateway (prometheus.yml defines 15 seconds)
+    // https://github.com/prometheus/pushgateway/issues/109
+    if group == "unknown" {
+        println!("Pausing for Build Rewind...");
+        sleep(Duration::from_secs(20));
+    }
+
     Ok(())
 }
 
