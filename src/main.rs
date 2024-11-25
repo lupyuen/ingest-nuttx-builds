@@ -351,6 +351,7 @@ async fn process_target(
             line.starts_with("remote: Compressing") ||  // "remote: Compressing objects:"
             line.starts_with("Receiving objects") ||  // "Receiving objects:   0%"
             line.starts_with("Resolving deltas") ||  // "Resolving deltas:   0%"
+            line.starts_with("Updating files") ||  // "Updating files:  12%"
             line.starts_with("CPP:  ")  // "CPP:  etc/init.d/rc.sysinit"
         { continue; }
 
