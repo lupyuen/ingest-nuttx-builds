@@ -99,7 +99,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         // Skip the filenames we've seen before
-        if past_filenames.contains(filename) {
+        // Except "ci-unknown.log" for Build Rewind
+        if past_filenames.contains(filename)
+            && !filename.contains("unknown") {
             println!("*** Skipping File {filename}: {url}");
             continue;
         }
