@@ -505,6 +505,11 @@ async fn post_to_pushgateway(
         if let Some(h) = apps_hash { format!(r#", apps_hash="{h}""#) }
         else { "".into() };
 
+    // Tag the Build Rewind as "rewind" user
+    let user =
+        if group == "unknown" { "rewind" }
+        else { user };
+
     // Compose the Pushgateway Metric
     let body = format!(
 r##"
