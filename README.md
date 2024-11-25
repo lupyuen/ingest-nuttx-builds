@@ -39,7 +39,9 @@ cargo run -- \
 ./build-github-and-ingest.sh
 ```
 
-[(See the __Run Log__)](https://gist.github.com/lupyuen/7da9c95b3efe39ff818772775c90da96)
+[(See the __Ingest Log for GitHub Gists__)](https://gist.github.com/lupyuen/7da9c95b3efe39ff818772775c90da96)
+
+[(See the __Ingest Log for GitHub Actions__)](https://gist.github.com/lupyuen/1c0c3ff584d083d59d4b2190ecee3f99)
 
 To install Grafana and Prometheus...
 
