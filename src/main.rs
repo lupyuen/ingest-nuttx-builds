@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let gists = octocrab
         .gists()
         .list_user_gists(&args.user)
-        .per_page(50)
+        .per_page(100)
         .send()
         .await?;
 
