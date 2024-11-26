@@ -354,7 +354,8 @@ async fn process_target(
             line.starts_with("Receiving objects") ||  // "Receiving objects:   0%"
             line.starts_with("Resolving deltas") ||  // "Resolving deltas:   0%"
             line.starts_with("Updating files") ||  // "Updating files:  12%"
-            line.starts_with("CPP:  ")  // "CPP:  etc/init.d/rc.sysinit"
+            line.starts_with("CPP:  ") ||  // "CPP:  etc/init.d/rc.sysinit"
+            line.starts_with("HEAD is now at")  // "HEAD is now at 7aa2dc24cd tools/gdb: fix checkpatch warning"
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
