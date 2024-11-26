@@ -506,9 +506,14 @@ async fn post_to_pushgateway(
         else { "".into() };
 
     // Tag the Build Rewind as "rewind" user
+    // Target becomes target@nuttx_hash@apps_hash: "ox64:nsh@7f84a64109f94787d92c2f44465e43fde6f3d28f@d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
+    // Target needs to be unique, otherwise it will be ignored by Prometheus
     let user =
         if group == "unknown" { "rewind" }
         else { user };
+    let target_rewind =
+        if user == "rewind" { format!("{target}@{}@{}", nuttx_hash.unwrap(), apps_hash.unwrap()) }
+        else { target.to_string() };
 
     // Compose the Pushgateway Metric
     let body = format!(
@@ -519,7 +524,7 @@ build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch=
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
-    let pushgateway = format!("http://localhost:9091/metrics/job/{user}/instance/{target}");
+    let pushgateway = format!("http://localhost:9091/metrics/job/{user}/instance/{target_rewind}");
     let res = client
         .post(pushgateway)
         .body(body)
