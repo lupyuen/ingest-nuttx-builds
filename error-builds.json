@@ -4,8 +4,8 @@
   "title": "Builds with Errors / Warnings",
   "gridPos": {
     "x": 0,
-    "y": 11,
-    "h": 10,
+    "y": 6,
+    "h": 14,
     "w": 24
   },
   "fieldConfig": {
@@ -138,6 +138,7 @@
           "Time": true,
           "Value": false,
           "__name__": true,
+          "apps_hash": true,
           "arch": true,
           "board": false,
           "config": false,
@@ -147,6 +148,7 @@
           "instance": true,
           "job": true,
           "msg": false,
+          "nuttx_hash": true,
           "subarch": true,
           "target": true,
           "timestamp": false,
@@ -192,8 +194,8 @@
     {
       "id": "formatString",
       "options": {
-        "outputFormat": "Upper Case",
-        "stringField": "target"
+        "outputFormat": "Lower Case",
+        "stringField": "Timestamp"
       }
     },
     {
@@ -214,7 +216,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", config!=\"leds64_zig\"}",
+      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", config!=\"leds64_zig\", timestamp!=\"2024-11-06T20:11:24\", timestamp!=\"2024-11-06T19:58:04\", timestamp!=\"2024-11-06T19:47:05\", timestamp!=\"2024-11-06T19:10:58\", timestamp!=\"2024-11-06T19:15:31\", timestamp!=\"2024-11-06T21:22:55\", timestamp!=\"2024-11-07T01:53:52\", timestamp!=\"2024-11-07T13:55:01\", timestamp!=\"2024-11-10T20:41:00\", timestamp!=\"2024-11-15T00:52:52\", timestamp!=\"2024-11-25T05:37:42\", user!=\"rewind\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,

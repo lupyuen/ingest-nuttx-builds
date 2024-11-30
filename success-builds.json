@@ -4,7 +4,7 @@
   "title": "Successful Builds",
   "gridPos": {
     "x": 0,
-    "y": 21,
+    "y": 20,
     "h": 12,
     "w": 24
   },
@@ -122,6 +122,7 @@
           "Time": true,
           "Value": true,
           "__name__": true,
+          "apps_hash": true,
           "arch": true,
           "board": false,
           "config": false,
@@ -131,6 +132,7 @@
           "instance": true,
           "job": true,
           "msg": false,
+          "nuttx_hash": true,
           "subarch": true,
           "target": true,
           "timestamp": false,
@@ -175,8 +177,8 @@
     {
       "id": "formatString",
       "options": {
-        "outputFormat": "Upper Case",
-        "stringField": "target"
+        "outputFormat": "Lower Case",
+        "stringField": "Timestamp"
       }
     },
     {

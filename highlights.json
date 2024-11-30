@@ -5,7 +5,7 @@
   "gridPos": {
     "x": 0,
     "y": 2,
-    "h": 9,
+    "h": 4,
     "w": 24
   },
   "fieldConfig": {
@@ -93,6 +93,7 @@
           "Time": true,
           "Value": false,
           "__name__": true,
+          "apps_hash": true,
           "arch": true,
           "board": false,
           "config": false,
@@ -102,6 +103,7 @@
           "instance": true,
           "job": true,
           "msg": true,
+          "nuttx_hash": true,
           "subarch": true,
           "target": true,
           "timestamp": true,
@@ -176,7 +178,7 @@
       "disableTextWrap": false,
       "editorMode": "builder",
       "exemplar": false,
-      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\"}",
+      "expr": "build_score{version=\"$version\", group=~\"$group\", board=~\"$board\", config=~\"$config\", arch=~\"$arch\", subarch=~\"$subarch\", timestamp!=\"2024-11-06T19:58:04\", timestamp!=\"2024-11-06T19:47:05\", timestamp!=\"2024-11-06T19:10:58\", timestamp!=\"2024-11-06T19:15:31\", timestamp!=\"2024-11-06T20:11:24\", timestamp!=\"2024-11-06T21:22:55\", timestamp!=\"2024-11-07T01:53:52\", timestamp!=\"2024-11-07T13:55:01\", timestamp!=\"2024-11-10T20:41:00\", timestamp!=\"2024-11-15T00:52:52\", timestamp!=\"2024-11-25T05:37:42\", user!=\"rewind\"}",
       "format": "table",
       "fullMetaSearch": false,
       "includeNullMetadata": true,
@@ -211,11 +213,5 @@
     "text": {
       "titleSize": 100
     }
-  },
-  "links": [
-    {
-      "title": "See the NuttX Build History",
-      "url": "/d/fe2q876wubc3kc/nuttx-build-history?from=now-2d&to=now&timezone=browser&var-arch=$__all&var-subarch=$__all&var-board=b-l072z-lrwan1&var-config=nsh&var-group=$__all&var-Filters="
-    }
-  ]
+  }
 }

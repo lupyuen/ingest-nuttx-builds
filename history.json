@@ -215,8 +215,8 @@
     {
       "id": "formatString",
       "options": {
-        "stringField": "Timestamp",
-        "outputFormat": "Lower Case"
+        "outputFormat": "Lower Case",
+        "stringField": "Timestamp"
       }
     },
     {
@@ -283,15 +283,16 @@
       "id": "organize",
       "options": {
         "excludeByName": {},
+        "includeByName": {},
         "indexByName": {
-          "Timestamp": 0,
-          "Severity (first)": 1,
           "Board (first)": 2,
+          "Build Log (first)": 7,
           "Config (first)": 3,
-          "nuttx_hash (first)": 4,
-          "apps_hash (first)": 5,
           "Message (first)": 6,
-          "Build Log (first)": 7
+          "Severity (first)": 1,
+          "Timestamp": 0,
+          "apps_hash (first)": 5,
+          "nuttx_hash (first)": 4
         },
         "renameByName": {
           "Board (first)": "Board",
@@ -306,8 +307,7 @@
           "Severity (firstNotNull)": "Severity",
           "apps_hash (first)": "Apps Hash",
           "nuttx_hash (first)": "NuttX Hash"
-        },
-        "includeByName": {}
+        }
       }
     }
   ],
@@ -349,8 +349,8 @@
     },
     "sortBy": [
       {
-        "displayName": "Timestamp",
-        "desc": true
+        "desc": true,
+        "displayName": "Timestamp"
       }
     ]
   }

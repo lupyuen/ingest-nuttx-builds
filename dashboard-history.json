@@ -520,13 +520,13 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "NuttX Build History",
   "uid": "fe2q876wubc3kc",
-  "version": 21,
+  "version": 22,
   "weekStart": ""
 }
