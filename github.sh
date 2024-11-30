@@ -30,9 +30,9 @@ function ingest_log {
       # | jq ".jobs | map(select(.id == $job_id)) | .[].name"
       # | jq ".jobs[].id,.jobs[].name"
   )
-  echo job_id=$job_id
+  set +x ; echo job_id=$job_id ; set -x
   if [[ "$job_id" == "" ]]; then
-    echo Job ID missing for Run ID $run_id, Job Name $job_name
+    set +x ; echo "**** Job ID missing for Run ID $run_id, Job Name $job_name" ; set -x
     sleep 10
     return
   fi
@@ -56,7 +56,7 @@ function ingest_log {
     | colrm 1 29 \
     > $pathname
   head -n 100 $pathname
-  echo url=$url
+  set +x ; echo url=$url ; set -x
 
   ## Ingest the Log File
   cargo run -- \
@@ -78,50 +78,46 @@ for (( ; ; )); do
   ## Generate the list of deconfigs
   defconfig=/tmp/defconfig-github.txt
   find $HOME/riscv/nuttx -name defconfig >$defconfig
-  date=$(date -u +'%Y-%m-%d')
 
   ## If Run ID not specified as parameter...
   if [[ "$run_id" == "" ]]; then
 
-    ## Get the Latest Run ID for today    
+    ## Get the Latest Run ID
     latest_run_id=$(
       gh run list \
         --repo $user/$repo \
         --limit 1 \
-        --created $date \
         --json databaseId,name,displayTitle,conclusion \
         --jq '.[].databaseId'
     )
-    echo latest_run_id=$latest_run_id
+    set +x ; echo latest_run_id=$latest_run_id ; set -x
 
-    ## Get the Latest Completed Run ID for today
-    run_id=$(
+    ## Get the Latest Completed Run ID
+    completed_run_id=$(
       gh run list \
         --repo $user/$repo \
         --limit 1 \
-        --created $date \
         --status completed \
         --json databaseId,name,displayTitle,conclusion \
         --jq '.[].databaseId'
     )
-    echo run_id=$run_id
+    set +x ; echo completed_run_id=$completed_run_id ; set -x
 
     ## Check that the Latest Run ID has completed
     if [[ "$latest_run_id" == "" ]]; then
-      echo No jobs today, quitting
+      set +x ; echo "**** No jobs found, quitting" ; set -x
+      date ; sleep 10
       exit
-    fi
-    if [[ "$run_id" == "" ]]; then
-      echo No completed runs for today, waiting...
+    elif [[ "$completed_run_id" == "" ]]; then
+      set +x ; echo "**** No completed runs found, waiting..." ; set -x
+      date ; sleep 300
+      continue
+    elif [[ "$completed_run_id" != "$latest_run_id" ]]; then
+      set +x ; echo "**** Latest run has not completed, waiting..." ; set -x
       date ; sleep 300
       continue
     fi
-    if [[ "$run_id" != "$latest_run_id" ]]; then
-      run_id=
-      echo Latest run has not completed, waiting...
-      date ; sleep 300
-      continue
-    fi
+    run_id=$latest_run_id
   fi
 
   ## Find the Second-Last Commit Hash for NuttX Mirror Repo
@@ -134,9 +130,9 @@ for (( ; ; )); do
   git clone https://github.com/NuttX/nuttx
   cd nuttx
   last_two_commits=$(git log -2 --pretty=format:"%H")
-  echo last_two_commits=$last_two_commits
+  set +x ; echo last_two_commits=$last_two_commits ; set -x
   nuttx_hash=$(echo $last_two_commits | cut -d ' ' -f 2)
-  echo nuttx_hash=$nuttx_hash
+  set +x ; echo nuttx_hash=$nuttx_hash ; set -x
   popd
 
   ## Find the Last Commit Hash for NuttX Apps Repo
@@ -147,7 +143,7 @@ for (( ; ; )); do
   git clone https://github.com/apache/nuttx-apps
   cd nuttx-apps
   apps_hash=$(git log -1 --pretty=format:"%H")
-  echo apps_hash=$apps_hash
+  set +x ; echo apps_hash=$apps_hash ; set -x
   popd
 
   ## Download the Run Logs
