@@ -82,6 +82,18 @@ for (( ; ; )); do
 
   ## If Run ID not specified as parameter...
   if [[ "$run_id" == "" ]]; then
+
+    ## Get the Latest Run ID for today    
+    latest_run_id=$(
+      gh run list \
+        --repo $user/$repo \
+        --limit 1 \
+        --created $date \
+        --json databaseId,name,displayTitle,conclusion \
+        --jq '.[].databaseId'
+    )
+    echo latest_run_id=$latest_run_id
+
     ## Get the Latest Completed Run ID for today
     run_id=$(
       gh run list \
@@ -93,22 +105,17 @@ for (( ; ; )); do
         --jq '.[].databaseId'
     )
     echo run_id=$run_id
+
+    ## Check that the Latest Run ID has completed
+    if [[ "$latest_run_id" == "" ]]; then
+      echo No jobs today, quitting
+      exit
+    fi
     if [[ "$run_id" == "" ]]; then
       echo No completed runs for today, waiting...
       date ; sleep 300
       continue
     fi
-
-    ## Get the Latest Run ID for today. Check that it has completed.
-    latest_run_id=$(
-      gh run list \
-        --repo $user/$repo \
-        --limit 1 \
-        --created $date \
-        --json databaseId,name,displayTitle,conclusion \
-        --jq '.[].databaseId'
-    )
-    echo latest_run_id=$latest_run_id
     if [[ "$run_id" != "$latest_run_id" ]]; then
       run_id=
       echo Latest run has not completed, waiting...
