@@ -372,12 +372,16 @@ async fn process_target(
     // "test_ltp_interfaces_aio_error_1_1 PASSED"
     // "lua-5.4.0/testes/errors.lua"
     // "nuttx-export-12.7.0/include/libcxx/__system_error"
+    // "string/lib_strerror.c"
+    // "string/lib_strerrorr.c"
     let msg_join = msg.join(" ");
     let contains_error = msg_join
         .replace("aio_error", "aio_e_r_r_o_r")
         .replace("errors.lua", "e_r_r_o_r_s.lua")
         .replace("_error", "_e_r_r_o_r")
         .replace("error_", "e_r_r_o_r_")
+        .replace("error.c", "e_r_r_o_r.c")
+        .replace("errorr.c", "e_r_r_o_r_r.c")
         .to_lowercase()
         .contains("error");
 
