@@ -577,8 +577,11 @@ set +x  ## Disable Echo
 . $HOME/gitlab-token.sh
 set -x  ## Echo commands
 
+## See Authentication Status
 cd /tmp
 glab auth status
+
+## Download a snippet
 raw_url=$(
   curl \
     --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
@@ -588,16 +591,19 @@ raw_url=$(
 )
 curl $raw_url
 
+## View Snippet Info
 curl \
   --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
   --url "https://gitlab.com/api/v4/snippets/4776259" \
   | jq
 
+## List the Snippets
 curl \
   --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
   --url "https://gitlab.com/api/v4/snippets" \
   | jq
 
+## Create a Snippet
 echo "package main" | \
   glab snippet new \
     --repo lupyuen/nuttx-build-log \
