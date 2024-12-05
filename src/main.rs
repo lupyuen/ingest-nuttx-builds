@@ -566,3 +566,43 @@ async fn get_sub_arch(defconfig: &str, target: &str) -> Result<String, Box<dyn s
     }
     Ok("unknown".into())
 }
+
+/* TODO: Support GitLab Snippets, since GitHub Gists will get blocked for overuse
+## brew install glab
+## export GITLAB_TOKEN=...
+## User Settings > Access tokens
+## Select scopes:
+## api: Grants complete read/write access to the API, including all groups and projects, the container registry, the dependency proxy, and the package registry.
+set +x  ## Disable Echo
+. $HOME/gitlab-token.sh
+set -x  ## Echo commands
+
+cd /tmp
+glab auth status
+raw_url=$(
+  curl \
+    --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+    --url "https://gitlab.com/api/v4/snippets/4776259" \
+    | jq '.files[0].raw_url' \
+    | tr -d '"'
+)
+curl $raw_url
+
+curl \
+  --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  --url "https://gitlab.com/api/v4/snippets/4776259" \
+  | jq
+
+curl \
+  --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  --url "https://gitlab.com/api/v4/snippets" \
+  | jq
+
+echo "package main" | \
+  glab snippet new \
+    --repo lupyuen/nuttx-build-log \
+    --visibility public \
+    --title "Title of the snippet" \
+    --filename "test.txt" \
+    --description "My Description"
+*/
