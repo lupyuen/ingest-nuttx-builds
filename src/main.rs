@@ -17,7 +17,7 @@ use std::{
 use chrono::DateTime;
 use clap::Parser;
 use regex::Regex;
-use serde_json::{json, Value, Error};
+use serde_json::Value;
 
 /// Command-Line Arguments
 #[derive(Parser, Debug)]
