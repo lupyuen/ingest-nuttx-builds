@@ -30,7 +30,7 @@ cargo run -- \
   --repo nuttx-build-log \
   --defconfig /tmp/defconfig.txt \
   | tr -d '\033\007'
-export GITLAB_TOKEN=
+unset GITLAB_TOKEN
 
 ## Ingest logs from nuttxpr GitHub Gist. Remove special characters.
 cargo run -- \
