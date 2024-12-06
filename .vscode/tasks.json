@@ -7,7 +7,7 @@
             "label": "Build",
             "type": "shell",
 
-            "command": "set -e ; echo ./run.sh ; . $HOME/github-token.sh ; set -x ; gh auth status ; find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt ; cargo run -- --user nuttxpr --defconfig /tmp/defconfig.txt | tr -d '\\033\\007' ",
+            "command": "set -e ; echo ./run.sh ; . $HOME/gitlab-token.sh ; echo . $HOME/github-token.sh ; set -x ; glab auth status ; gh auth status ; find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt ; cargo run -- --user lupyuen --repo nuttx-build-log --defconfig /tmp/defconfig.txt | tr -d '\\033\\007' ",
 
             "problemMatcher": "$rustc",
             "group": {

@@ -11,4 +11,5 @@ log = "0.4.22"
 octocrab = "0.41.2"
 regex = "1.11.1"
 reqwest = "0.12.9"
+serde_json = "1.0.133"
 tokio = { version = "1.41.0", features = ["full"] }
