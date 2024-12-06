@@ -13,30 +13,41 @@ Read the articles...
 To ingest NuttX Build Logs into Prometheus Pushgateway: [run.sh](run.sh)
 
 ```bash
-## Any GitHub Token with read access will do:
+## We prefer GitLab Snippets, since GitHub Gists will get blocked for overuse.
+## For GitLab Snippets: Any GitLab Token with read access will do
+## export GITLAB_TOKEN=...
+. $HOME/gitlab-token.sh
+
+## For GitHub Gists: Any GitHub Token with read access will do
 ## export GITHUB_TOKEN=...
 . $HOME/github-token.sh
 
 ## Find all defconfig files
-find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt
+cd $HOME ; git clone https://github.com/apache/nuttx
+find $HOME/nuttx -name defconfig >/tmp/defconfig.txt
+
+## Ingest logs from lupyuen/nuttx-build-log GitLab Snippets. Remove special characters.
+cargo run -- \
+  --user lupyuen \
+  --repo nuttx-build-log 
+  --defconfig /tmp/defconfig.txt \
+  | tr -d '\033\007'
 
 ## Ingest logs from nuttxpr GitHub Gist. Remove special characters.
 cargo run -- \
   --user nuttxpr \
   --defconfig /tmp/defconfig.txt \
-  | tr -d '\\033'
-
-## Ingest logs from jerpelea GitHub Gist. Remove special characters.
-cargo run -- \
-  --user jerpelea \
-  --defconfig /tmp/defconfig.txt \
-  | tr -d '\\033'
+  | tr -d '\033\007'
 
 ## Ingest logs from GitHub Actions
 ./github.sh
 
 ## Or: Start GitHub Actions Build, wait to complete then ingest logs
 ./build-github-and-ingest.sh
+
+## Or: Sync NuttX Mirror Repo, start GitHub Actions Build, wait to complete then ingest logs
+## https://github.com/lupyuen/nuttx-release/blob/main/sync-build-ingest.sh
+../nuttx-release/sync-build-ingest.sh
 ```
 
 [(See the __Ingest Log for GitHub Gists__)](https://gist.github.com/lupyuen/7da9c95b3efe39ff818772775c90da96)
