@@ -14,10 +14,6 @@ To ingest NuttX Build Logs into Prometheus Pushgateway: [run.sh](run.sh)
 
 ```bash
 ## We prefer GitLab Snippets, since GitHub Gists will get blocked for overuse.
-## For GitLab Snippets: Any GitLab Token with read access will do
-## export GITLAB_TOKEN=...
-. $HOME/gitlab-token.sh
-
 ## For GitHub Gists: Any GitHub Token with read access will do
 ## export GITHUB_TOKEN=...
 . $HOME/github-token.sh
@@ -27,11 +23,14 @@ cd $HOME ; git clone https://github.com/apache/nuttx
 find $HOME/nuttx -name defconfig >/tmp/defconfig.txt
 
 ## Ingest logs from lupyuen/nuttx-build-log GitLab Snippets. Remove special characters.
+## gitlab-token.sh contains "export GITHUB_TOKEN=...", any GitLab Token with read access will do.
+set +x ; . $HOME/gitlab-token.sh ; set -x
 cargo run -- \
   --user lupyuen \
-  --repo nuttx-build-log 
+  --repo nuttx-build-log \
   --defconfig /tmp/defconfig.txt \
   | tr -d '\033\007'
+GITLAB_TOKEN=
 
 ## Ingest logs from nuttxpr GitHub Gist. Remove special characters.
 cargo run -- \
