@@ -19,7 +19,7 @@ for (( ; ; )); do
     --repo nuttx-build-log \
     --defconfig /tmp/defconfig.txt \
     | tr -d '\033\007'
-  GITLAB_TOKEN=
+  export GITLAB_TOKEN=
   date ; sleep 300
 
   ## Ingest logs from nuttxmacos GitHub Gist. Remove special characters.
