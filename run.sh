@@ -22,13 +22,6 @@ for (( ; ; )); do
   unset GITLAB_TOKEN
   date ; sleep 300
 
-  ## Ingest logs from nuttxmacos GitHub Gist. Remove special characters.
-  cargo run -- \
-    --user nuttxmacos \
-    --defconfig /tmp/defconfig.txt \
-    | tr -d '\033\007'
-  date ; sleep 300
-
   ## Ingest logs from lvanasse GitHub Gist. Remove special characters.
   cargo run -- \
     --user lvanasse \
