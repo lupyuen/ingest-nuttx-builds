@@ -7,7 +7,7 @@ description = "Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgate
 homepage = "https://lupyuen.github.io/articles/ci4"
 repository = "https://github.com/lupyuen/ingest-nuttx-builds"
 readme = "README.md"
-keywords = ["nuttx", "rtos", "ci", "github", "gitlab", "prometheus", "pushgateway"]
+keywords = ["nuttx", "rtos", "ci", "prometheus", "pushgateway"]
 categories = ["command-line-utilities"]
 
 [dependencies]
