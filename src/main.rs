@@ -424,6 +424,7 @@ async fn process_target(
             line.starts_with("Enabling") ||
             line.starts_with("Building") ||
             line.starts_with("Normalize") ||
+            line.starts_with("[1/1] Normalize") ||  // "[1/1] Normalize linum-stm32h753bi/nsh"
             line.starts_with("% Total") ||
             line.starts_with("Dload") ||
             line.starts_with("~/apps") ||
