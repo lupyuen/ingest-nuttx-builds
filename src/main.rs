@@ -16,7 +16,6 @@ use std::{
 };
 use chrono::DateTime;
 use clap::Parser;
-use env_logger::fmt::Timestamp;
 use regex::Regex;
 use serde_json::Value;
 
