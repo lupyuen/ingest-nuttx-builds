@@ -454,7 +454,9 @@ async fn process_target(
             line.starts_with("Resolving deltas") ||  // "Resolving deltas:   0%"
             line.starts_with("Updating files") ||  // "Updating files:  12%"
             line.starts_with("CPP:  ") ||  // "CPP:  etc/init.d/rc.sysinit"
-            line.starts_with("HEAD is now at")  // "HEAD is now at 7aa2dc24cd tools/gdb: fix checkpatch warning"
+            line.starts_with("HEAD is now at") ||  // "HEAD is now at 7aa2dc24cd tools/gdb: fix checkpatch warning"
+            line.starts_with("CP: ") ||  // "CP: arch/dummy/Kconfig to /tmp/build-test-knsh64/nuttx/arch/dummy/dummy_kconfig"
+            line.starts_with("LN: ") // "LN: platform/board to /tmp/build-test-knsh64/apps/platform/dummy"
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
@@ -474,19 +476,24 @@ async fn process_target(
     // "string/lib_strerror.c"
     // "string/lib_strerrorr.c"
     let msg_join = msg.join(" ");
-    let contains_error = msg_join
+    let msg_join2 = msg_join
         .replace("aio_error", "aio_e_r_r_o_r")
         .replace("errors.lua", "e_r_r_o_r_s.lua")
         .replace("_error", "_e_r_r_o_r")
         .replace("error_", "e_r_r_o_r_")
         .replace("error.c", "e_r_r_o_r.c")
         .replace("errorr.c", "e_r_r_o_r_r.c")
+        .replace("nerrors=0", "n_e_r_r_o_r_s=0")  // "robust_test: Test complete with nerrors=0"
+        .replace("Errors\t0", "E_r_r_o_r_s\t0");  // "Errors\t0       0"
+    let contains_error = msg_join2
         .to_lowercase()
         .contains("error");
+    if group == "unknown" && contains_error { println!("contains_error1: msg_join2=\n{msg_join2}"); }
 
     // Identify CI Test as Error: "test_helloxx FAILED"
     let contains_error = contains_error ||
         msg_join.contains(" FAILED");
+    if group == "unknown" && contains_error { println!("contains_error2: msg_join=\n{msg_join}"); }
 
     // Given Board=sim, Config=rtptools
     // Identify defconfig as Error: "modified:...boards/sim/sim/sim/configs/rtptools/defconfig"
@@ -500,6 +507,7 @@ async fn process_target(
         msg_join.contains(&"boards/") &&
         msg_join.contains(&board_config.as_str())
     );
+    if group == "unknown" && contains_error { println!("contains_error3: msg_join=\n{msg_join}"); }
 
     // Search for Warnings
     let contains_warning = msg_join
