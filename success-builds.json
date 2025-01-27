@@ -136,6 +136,7 @@
           "subarch": true,
           "target": true,
           "timestamp": false,
+          "timestamp_log": true,
           "url": false,
           "url_display": true,
           "user": true,
