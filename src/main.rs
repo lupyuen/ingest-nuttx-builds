@@ -16,6 +16,7 @@ use std::{
 };
 use chrono::DateTime;
 use clap::Parser;
+use env_logger::fmt::Timestamp;
 use regex::Regex;
 use serde_json::Value;
 
@@ -93,6 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for mut gist in gists {
         let id = gist.id;  // "6e5150f02e081be935fa525e6546cb2b"
         let url = gist.html_url;  // "https://gist.github.com/nuttxpr/6e5150f02e081be935fa525e6546cb2b"
+        let timestamp_log = gist.created_at.to_rfc3339();
 
         // Skip the Dubious Gists
         if gist.files.first_entry().is_none() {
@@ -127,6 +129,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("target_group={target_group:?}");
         println!("filename={filename:?}");
         println!("raw_url={raw_url:?}");
+        println!("timestamp_log={timestamp_log:?}");
 
         // Description contains: [arm-14] CI Log for nuttx @ 7f84a64109f94787d92c2f44465e43fde6f3d28f / nuttx-apps @ d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288
         // Extract the NuttX Hash and the Apps Hash
@@ -154,7 +157,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Process the Build Log
         process_log(
-            &body, &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
+            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -202,6 +205,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
         let description = snippet["title"].as_str().unwrap_or("<No description>".into());
         let url = snippet["web_url"].as_str().unwrap();
         let raw_url = snippet["raw_url"].as_str().unwrap();
+        let timestamp_log = snippet["created_at"].as_str().unwrap();
         let filename = snippet["file_name"].as_str().unwrap_or("no_filename".into());
         if !filename.starts_with("ci-") {
             println!("*** Not A Build Log: {url}");
@@ -236,6 +240,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
         }
         println!("nuttx_hash={nuttx_hash:?}");
         println!("apps_hash={apps_hash:?}");
+        println!("timestamp_log={timestamp_log:?}");
     
         // Download the Gist
         let res = reqwest::get(raw_url).await?;
@@ -246,7 +251,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
 
         // Process the Build Log
         process_log(
-            &body, &args.user, &args.defconfig, &target_group, &url, &filename,
+            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url, &filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -272,7 +277,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
         .to_str().unwrap();
     let log = fs::read_to_string(&args.file).unwrap();
     process_log(
-        &log, &args.user, &args.defconfig, &args.group, "", filename,
+        &log, None, &args.user, &args.defconfig, &args.group, "", filename,
         Some(&args.nuttx_hash), Some(&args.apps_hash),
         Some(&args.repo), Some(&args.run_id), Some(&args.job_id), Some(&args.step)
     ).await?;
@@ -293,6 +298,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
 /// ====================================================================================
 async fn process_log(
     log: &str,  // Content of Build Log
+    timestamp_log: Option<&str>,  // Timestamp of Build Log: "2025-01-27T07:42:32.099Z"
     user: &str,  // "nuttxpr"
     defconfig: &str,  // "/tmp/defconfig.txt"
     group: &str,  // "arm-04"
@@ -318,7 +324,7 @@ async fn process_log(
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
                 process_target(
-                    target, user, defconfig, group, url, filename,
+                    target, timestamp_log, user, defconfig, group, url, filename,
                     nuttx_hash, apps_hash, utc_time, local_time,
                     repo, run_id, job_id, step, l
                 ).await?;
@@ -349,6 +355,7 @@ async fn process_log(
 ///   Normalize freedom-kl25z/nsh
 async fn process_target(
     lines: &[&str],  // Content of Build Log
+    timestamp_log: Option<&str>,  // Timestamp of Build Log: "2025-01-27T07:42:32.099Z"
     user: &str,  // "nuttxpr"
     defconfig: &str,  // "/tmp/defconfig.txt"
     group: &str,  // "arm-04"
@@ -549,6 +556,7 @@ async fn process_target(
     post_to_pushgateway(
         build_score,
         &timestamp,
+        timestamp_log,
         user,
         defconfig,
         group,
@@ -570,6 +578,7 @@ async fn process_target(
 async fn post_to_pushgateway(
     build_score: f32,
     timestamp: &str,
+    timestamp_log: Option<&str>,  // Timestamp of Build Log: "2025-01-27T07:42:32.099Z"
     user: &str,
     defconfig: &str,
     group: &str,
@@ -619,10 +628,10 @@ async fn post_to_pushgateway(
         else { url.replace("https://", "") };
 
     // Compose the NuttX and Apps Hashes    
-    let nuttx_hash_opt=
+    let nuttx_hash_opt =
         if let Some(h) = nuttx_hash { format!(r#", nuttx_hash="{h}""#) }
         else { "".into() };
-    let apps_hash_opt=
+    let apps_hash_opt =
         if let Some(h) = apps_hash { format!(r#", apps_hash="{h}""#) }
         else { "".into() };
 
@@ -636,12 +645,17 @@ async fn post_to_pushgateway(
         if user == "rewind" { format!("{target}@{}@{}", nuttx_hash.unwrap(), apps_hash.unwrap()) }
         else { target.to_string() };
 
+    // Get the Log Timestamp
+    let timestamp_log =
+        if let Some(t) = timestamp_log { t }
+        else { timestamp };
+
     // Compose the Pushgateway Metric
     let body = format!(
 r##"
 # TYPE build_score gauge
 # HELP build_score 1.0 for successful build, 0.0 for failed build
-build_score{{ version="{version}", timestamp="{timestamp}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt} }} {build_score}
+build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{timestamp_log}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt} }} {build_score}
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
