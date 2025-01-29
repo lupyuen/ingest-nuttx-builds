@@ -662,12 +662,12 @@ async fn post_to_pushgateway(
         else { target.to_string() };
     let prev_opt =
         if build_score_prev.is_some() {
-            format!(", nuttx_hash_prev={}, apps_hash_prev={}, build_score_prev={}", 
+            format!(r#", nuttx_hash_prev="{}", apps_hash_prev="{}", build_score_prev="{}""#, 
                 nuttx_hash_prev.clone().unwrap(), apps_hash_prev.clone().unwrap(), build_score_prev.unwrap())
         } else { "".into() };
     let next_opt =
         if build_score_next.is_some() {
-            format!(", nuttx_hash_next={}, apps_hash_next={}, build_score_next={}", 
+            format!(r#", nuttx_hash_next="{}", apps_hash_next="{}", build_score_next="{}""#, 
                 nuttx_hash_next.clone().unwrap(), apps_hash_next.clone().unwrap(), build_score_next.unwrap())
         } else { "".into() };
 
