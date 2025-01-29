@@ -704,8 +704,8 @@ async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dy
         // If Successful: build_score=1
         let line = line.to_lowercase();
         let build_score =
-            if line.contains("build / test fail") { 0.0 }
-            else if line.contains("build / test ok") { 1.0 }
+            if line.contains("test fail") { 0.0 }
+            else if line.contains("test ok") { 1.0 }
             else { println!("*** Unknown Build Score: {line}"); sleep(Duration::from_secs(1)); continue; };
 
         // Extract nuttx hash and apps hash
