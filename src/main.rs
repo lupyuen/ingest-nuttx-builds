@@ -686,21 +686,59 @@ build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{time
 }
 
 // Extract the fields for Build Rewind, based on the Build Log
+// ***** Build / Test OK for Previous Commit: nuttx @ be40c01ddd6f43a527abeae31042ba7978aabb58 / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
+// ***** BUILD / TEST FAILED FOR NEXT COMMIT: nuttx @ 48846954d8506e1c95089a8654787fdc42cc098c / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
 async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
+    let mut nuttx_hash_prev: Option<String> = None;
+    let mut apps_hash_prev: Option<String> = None;
+    let mut build_score_prev: Option<f32> = None;
+    let mut nuttx_hash_next: Option<String> = None;
+    let mut apps_hash_next: Option<String> = None;
+    let mut build_score_next: Option<f32> = None;
     for line in lines {
-        if line.contains("*****") { println!("line={line}"); }
+        if !line.starts_with("*****") { continue; }
+        println!("line={line}");
+
+        // Search for: "build / test failed" vs "build / test ok"
+        // If Failed: build_score=0
+        // If Successful: build_score=1
+        let line = line.to_lowercase();
+        let build_score =
+            if line.contains("build / test fail") { 0.0 }
+            else if line.contains("build / test ok") { 1.0 }
+            else { println!("*** Unknown Build Score: {line}"); sleep(Duration::from_secs(1)); continue; };
+
+        // Extract nuttx hash and apps hash
+        let mut nuttx_hash: Option<String> = None;
+        let mut apps_hash: Option<String> = None;
+        let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
+        let caps = re.captures(&line);
+        if let Some(caps) = caps {
+            let nuttx = caps.get(1).unwrap().as_str();
+            let apps = caps.get(2).unwrap().as_str();
+            nuttx_hash = Some(nuttx.into());  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+            apps_hash = Some(apps.into());  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
+        } else { println!("*** Missing Git Hash: {line}"); continue; }
+
+        // Search for: "previous commit" vs "next commit"
+        if line.contains("previous commit") {
+            (nuttx_hash_prev, apps_hash_prev, build_score_prev) = (nuttx_hash, apps_hash, Some(build_score)); 
+        } else if line.contains("next commit") {
+            (nuttx_hash_next, apps_hash_next, build_score_next) = (nuttx_hash, apps_hash, Some(build_score)); 
+        }
     }
-    Ok(("".into(), "".into(), "".into(), "".into(), "".into(), "".into()))
+    println!("{:?}", (&nuttx_hash_prev, &apps_hash_prev, &build_score_prev, &nuttx_hash_next, &apps_hash_next, &build_score_next));
+    Ok((nuttx_hash_prev, apps_hash_prev, build_score_prev, nuttx_hash_next, apps_hash_next, build_score_next))
 }
 
 // Fields for Build Rewind
 type RewindFields = (
-    String,  // nuttx_hash_prev
-    String,  // apps_hash_prev
-    String,  // build_score_prev
-    String,  // nuttx_hash_next
-    String,  // apps_hash_next
-    String,  // build_score_next
+    Option<String>,  // nuttx_hash_prev
+    Option<String>,  // apps_hash_prev
+    Option<f32>,     // build_score_prev
+    Option<String>,  // nuttx_hash_next
+    Option<String>,  // apps_hash_next
+    Option<f32>,     // build_score_next
 );
 
 // Given a list of all defconfig pathnames, search for a target (like "ox64:nsh")
