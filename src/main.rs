@@ -156,7 +156,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Process the Build Log
         process_log(
-            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
+            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, url.as_str(), filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -201,11 +201,11 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
     let mut past_filenames = HashSet::<String>::new();
     for snippet in snippets.as_array().unwrap() {
         println!("snippet={snippet}");
-        let description = snippet["title"].as_str().unwrap_or("<No description>".into());
+        let description = snippet["title"].as_str().unwrap_or("<No description>");
         let url = snippet["web_url"].as_str().unwrap();
         let raw_url = snippet["raw_url"].as_str().unwrap();
         let timestamp_log = snippet["created_at"].as_str().unwrap();
-        let filename = snippet["file_name"].as_str().unwrap_or("no_filename".into());
+        let filename = snippet["file_name"].as_str().unwrap_or("no_filename");
         if !filename.starts_with("ci-") {
             println!("*** Not A Build Log: {url}");
             continue;
@@ -228,7 +228,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
         let mut nuttx_hash: Option<&str> = None;
         let mut apps_hash: Option<&str> = None;
         let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
-        let caps = re.captures(&description);
+        let caps = re.captures(description);
         if let Some(caps) = caps {
             let nuttx = caps.get(1).unwrap().as_str();
             let apps = caps.get(2).unwrap().as_str();
@@ -250,7 +250,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
 
         // Process the Build Log
         process_log(
-            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url, &filename,
+            &body, Some(timestamp_log), &args.user, &args.defconfig, &target_group, url, filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -522,9 +522,9 @@ async fn process_target(
     let board_config = format!("/{board}/configs/{config}/defconfig");
     let contains_error = contains_error ||
     (
-        msg_join.contains(&"modified:") &&
-        msg_join.contains(&"boards/") &&
-        msg_join.contains(&board_config.as_str())
+        msg_join.contains("modified:") &&
+        msg_join.contains("boards/") &&
+        msg_join.contains(board_config.as_str())
     );
     if group == "unknown" && contains_error { println!("contains_error3: msg_join=\n{msg_join}"); }
 
@@ -660,6 +660,16 @@ async fn post_to_pushgateway(
     let target_rewind =
         if user == "rewind" { format!("{target}@{}@{}", nuttx_hash.unwrap(), apps_hash.unwrap()) }
         else { target.to_string() };
+    let prev_opt =
+        if build_score_prev.is_some() {
+            format!(", nuttx_hash_prev={}, apps_hash_prev={}, build_score_prev={}", 
+                nuttx_hash_prev.clone().unwrap(), apps_hash_prev.clone().unwrap(), build_score_prev.unwrap())
+        } else { "".into() };
+    let next_opt =
+        if build_score_next.is_some() {
+            format!(", nuttx_hash_next={}, apps_hash_next={}, build_score_next={}", 
+                nuttx_hash_next.clone().unwrap(), apps_hash_next.clone().unwrap(), build_score_next.unwrap())
+        } else { "".into() };
 
     // Get the Log Timestamp
     let timestamp_log =
@@ -671,7 +681,7 @@ async fn post_to_pushgateway(
 r##"
 # TYPE build_score gauge
 # HELP build_score 1.0 for successful build, 0.0 for failed build
-build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{timestamp_log}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt} }} {build_score}
+build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{timestamp_log}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt}{prev_opt}{next_opt} }} {build_score}
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
@@ -713,8 +723,8 @@ async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dy
             else { println!("*** Unknown Build Score: {line}"); sleep(Duration::from_secs(1)); continue; };
 
         // Extract nuttx hash and apps hash
-        let mut nuttx_hash: Option<String> = None;
-        let mut apps_hash: Option<String> = None;
+        let nuttx_hash: Option<String>;
+        let apps_hash: Option<String>;
         let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
         let caps = re.captures(&line);
         if let Some(caps) = caps {
