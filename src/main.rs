@@ -649,6 +649,18 @@ async fn post_to_pushgateway(
         if let Some(t) = timestamp_log { t }
         else { timestamp };
 
+    // Extract the fields for Build Rewind
+    if group == "unknown" {
+        let (
+            nuttx_hash_prev,
+            apps_hash_prev,
+            build_score_prev,
+            nuttx_hash_next,
+            apps_hash_next,            
+            build_score_next,
+        ) = extract_rewind_fields(msg).await?;
+    }
+
     // Compose the Pushgateway Metric
     let body = format!(
 r##"
@@ -671,6 +683,21 @@ build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{time
     }
     Ok(())
 }
+
+// Extract the fields for Build Rewind, based on the Build Log
+async fn extract_rewind_fields(msg: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
+    Ok(("".into(), "".into(), "".into(), "".into(), "".into(), "".into()))
+}
+
+// Fields for Build Rewind
+type RewindFields = (
+    String,  // nuttx_hash_prev
+    String,  // apps_hash_prev
+    String,  // build_score_prev
+    String,  // nuttx_hash_next
+    String,  // apps_hash_next
+    String,  // build_score_next
+);
 
 // Given a list of all defconfig pathnames, search for a target (like "ox64:nsh")
 // and return the Sub-Architecture (like "bl808")
