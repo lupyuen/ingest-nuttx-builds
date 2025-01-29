@@ -317,7 +317,7 @@ async fn process_log(
     let mut local_time: Option<&str> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
 
-    // Extract the fields for Build Rewind
+    // For Build Rewind: Extract the fields
     let (
         nuttx_hash_prev, apps_hash_prev, build_score_prev,
         nuttx_hash_next, apps_hash_next, build_score_next,
@@ -338,6 +338,9 @@ async fn process_log(
                     &nuttx_hash_prev, &apps_hash_prev, build_score_prev,
                     &nuttx_hash_next, &apps_hash_next, build_score_next,
                 ).await?;
+
+                // For Build Rewind: Process only the First Target ("This Commit")
+                if group == "unknown" { break; }
             }
             target_linenum = Some(linenum + 1);
 
