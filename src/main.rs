@@ -318,16 +318,12 @@ async fn process_log(
     let lines = &log.split('\n').collect::<Vec<_>>();
 
     // Extract the fields for Build Rewind
-    if group == "unknown" {
-        let (
-            nuttx_hash_prev,
-            apps_hash_prev,
-            build_score_prev,
-            nuttx_hash_next,
-            apps_hash_next,            
-            build_score_next,
-        ) = extract_rewind_fields(lines).await?;
-    }
+    let (
+        nuttx_hash_prev, apps_hash_prev, build_score_prev,
+        nuttx_hash_next, apps_hash_next, build_score_next,
+    ) =
+        if group == "unknown" { extract_rewind_fields(lines).await? }
+        else { (None, None, None, None, None, None) };
 
     for (linenum, line) in lines.into_iter().enumerate() {
         // Not a delimiter: ====== test session starts
@@ -338,7 +334,9 @@ async fn process_log(
                 process_target(
                     target, timestamp_log, user, defconfig, group, url, filename,
                     nuttx_hash, apps_hash, utc_time, local_time,
-                    repo, run_id, job_id, step, l
+                    repo, run_id, job_id, step, l,
+                    &nuttx_hash_prev, &apps_hash_prev, build_score_prev,
+                    &nuttx_hash_next, &apps_hash_next, build_score_next,
                 ).await?;
             }
             target_linenum = Some(linenum + 1);
@@ -382,6 +380,8 @@ async fn process_target(
     job_id: Option<&str>,  // "32310817851"
     step: Option<&str>,  // "7"
     linenum: usize,  // Line Number of Build Log
+    nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
+    nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
@@ -576,7 +576,9 @@ async fn process_target(
         &url,
         nuttx_hash,
         apps_hash,
-        &msg
+        &msg,
+        nuttx_hash_prev, apps_hash_prev, build_score_prev,
+        nuttx_hash_next, apps_hash_next, build_score_next,
     ).await?;
     Ok(())
 }
@@ -599,6 +601,8 @@ async fn post_to_pushgateway(
     nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
     apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
     msg: &Vec<&str>,
+    nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
+    nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
     let version = 3;
