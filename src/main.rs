@@ -316,6 +316,19 @@ async fn process_log(
     let mut utc_time: Option<&str> = None;
     let mut local_time: Option<&str> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
+
+    // Extract the fields for Build Rewind
+    if group == "unknown" {
+        let (
+            nuttx_hash_prev,
+            apps_hash_prev,
+            build_score_prev,
+            nuttx_hash_next,
+            apps_hash_next,            
+            build_score_next,
+        ) = extract_rewind_fields(lines).await?;
+    }
+
     for (linenum, line) in lines.into_iter().enumerate() {
         // Not a delimiter: ====== test session starts
         if line.starts_with(DELIMITER) && !line.contains(" ") {
@@ -649,18 +662,6 @@ async fn post_to_pushgateway(
         if let Some(t) = timestamp_log { t }
         else { timestamp };
 
-    // Extract the fields for Build Rewind
-    if group == "unknown" {
-        let (
-            nuttx_hash_prev,
-            apps_hash_prev,
-            build_score_prev,
-            nuttx_hash_next,
-            apps_hash_next,            
-            build_score_next,
-        ) = extract_rewind_fields(msg).await?;
-    }
-
     // Compose the Pushgateway Metric
     let body = format!(
 r##"
@@ -685,7 +686,10 @@ build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{time
 }
 
 // Extract the fields for Build Rewind, based on the Build Log
-async fn extract_rewind_fields(msg: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
+async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
+    for line in lines {
+        if line.contains("*****") { println!("line={line}"); }
+    }
     Ok(("".into(), "".into(), "".into(), "".into(), "".into(), "".into()))
 }
 
