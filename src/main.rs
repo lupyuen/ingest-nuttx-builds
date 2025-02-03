@@ -156,7 +156,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Process the Build Log
         process_log(
-            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url.as_str(), &filename,
+            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, url.as_str(), filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -201,11 +201,11 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
     let mut past_filenames = HashSet::<String>::new();
     for snippet in snippets.as_array().unwrap() {
         println!("snippet={snippet}");
-        let description = snippet["title"].as_str().unwrap_or("<No description>".into());
+        let description = snippet["title"].as_str().unwrap_or("<No description>");
         let url = snippet["web_url"].as_str().unwrap();
         let raw_url = snippet["raw_url"].as_str().unwrap();
         let timestamp_log = snippet["created_at"].as_str().unwrap();
-        let filename = snippet["file_name"].as_str().unwrap_or("no_filename".into());
+        let filename = snippet["file_name"].as_str().unwrap_or("no_filename");
         if !filename.starts_with("ci-") {
             println!("*** Not A Build Log: {url}");
             continue;
@@ -228,7 +228,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
         let mut nuttx_hash: Option<&str> = None;
         let mut apps_hash: Option<&str> = None;
         let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
-        let caps = re.captures(&description);
+        let caps = re.captures(description);
         if let Some(caps) = caps {
             let nuttx = caps.get(1).unwrap().as_str();
             let apps = caps.get(2).unwrap().as_str();
@@ -250,7 +250,7 @@ async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>>
 
         // Process the Build Log
         process_log(
-            &body, Some(&timestamp_log), &args.user, &args.defconfig, &target_group, &url, &filename,
+            &body, Some(timestamp_log), &args.user, &args.defconfig, &target_group, url, filename,
             nuttx_hash, apps_hash,
             None, None, None, None
         ).await?;
@@ -316,6 +316,15 @@ async fn process_log(
     let mut utc_time: Option<&str> = None;
     let mut local_time: Option<&str> = None;
     let lines = &log.split('\n').collect::<Vec<_>>();
+
+    // For Build Rewind: Extract the fields
+    let (
+        nuttx_hash_prev, apps_hash_prev, build_score_prev,
+        nuttx_hash_next, apps_hash_next, build_score_next,
+    ) =
+        if group == "unknown" { extract_rewind_fields(lines).await? }
+        else { (None, None, None, None, None, None) };
+
     for (linenum, line) in lines.into_iter().enumerate() {
         // Not a delimiter: ====== test session starts
         if line.starts_with(DELIMITER) && !line.contains(" ") {
@@ -325,8 +334,13 @@ async fn process_log(
                 process_target(
                     target, timestamp_log, user, defconfig, group, url, filename,
                     nuttx_hash, apps_hash, utc_time, local_time,
-                    repo, run_id, job_id, step, l
+                    repo, run_id, job_id, step, l,
+                    &nuttx_hash_prev, &apps_hash_prev, build_score_prev,
+                    &nuttx_hash_next, &apps_hash_next, build_score_next,
                 ).await?;
+
+                // For Build Rewind: Process only the First Target ("This Commit")
+                if group == "unknown" { break; }
             }
             target_linenum = Some(linenum + 1);
 
@@ -369,6 +383,8 @@ async fn process_target(
     job_id: Option<&str>,  // "32310817851"
     step: Option<&str>,  // "7"
     linenum: usize,  // Line Number of Build Log
+    nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
+    nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
@@ -509,9 +525,9 @@ async fn process_target(
     let board_config = format!("/{board}/configs/{config}/defconfig");
     let contains_error = contains_error ||
     (
-        msg_join.contains(&"modified:") &&
-        msg_join.contains(&"boards/") &&
-        msg_join.contains(&board_config.as_str())
+        msg_join.contains("modified:") &&
+        msg_join.contains("boards/") &&
+        msg_join.contains(board_config.as_str())
     );
     if group == "unknown" && contains_error { println!("contains_error3: msg_join=\n{msg_join}"); }
 
@@ -563,7 +579,9 @@ async fn process_target(
         &url,
         nuttx_hash,
         apps_hash,
-        &msg
+        &msg,
+        nuttx_hash_prev, apps_hash_prev, build_score_prev,
+        nuttx_hash_next, apps_hash_next, build_score_next,
     ).await?;
     Ok(())
 }
@@ -586,6 +604,8 @@ async fn post_to_pushgateway(
     nuttx_hash: Option<&str>,  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
     apps_hash: Option<&str>,  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
     msg: &Vec<&str>,
+    nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
+    nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
     let version = 3;
@@ -643,6 +663,16 @@ async fn post_to_pushgateway(
     let target_rewind =
         if user == "rewind" { format!("{target}@{}@{}", nuttx_hash.unwrap(), apps_hash.unwrap()) }
         else { target.to_string() };
+    let prev_opt =
+        if build_score_prev.is_some() {
+            format!(r#", nuttx_hash_prev="{}", apps_hash_prev="{}", build_score_prev="{}""#, 
+                nuttx_hash_prev.clone().unwrap(), apps_hash_prev.clone().unwrap(), build_score_prev.unwrap())
+        } else { "".into() };
+    let next_opt =
+        if build_score_next.is_some() {
+            format!(r#", nuttx_hash_next="{}", apps_hash_next="{}", build_score_next="{}""#, 
+                nuttx_hash_next.clone().unwrap(), apps_hash_next.clone().unwrap(), build_score_next.unwrap())
+        } else { "".into() };
 
     // Get the Log Timestamp
     let timestamp_log =
@@ -654,7 +684,7 @@ async fn post_to_pushgateway(
 r##"
 # TYPE build_score gauge
 # HELP build_score 1.0 for successful build, 0.0 for failed build
-build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{timestamp_log}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt} }} {build_score}
+build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{timestamp_log}", user="{user}", arch="{arch}", subarch="{subarch}", group="{group}", board="{board}", config="{config}", target="{target}", url="{url}", url_display="{url_display}"{msg_opt}{nuttx_hash_opt}{apps_hash_opt}{prev_opt}{next_opt} }} {build_score}
 "##);
     println!("body={body}");
     let client = reqwest::Client::new();
@@ -671,6 +701,62 @@ build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{time
     }
     Ok(())
 }
+
+// Extract the fields for Build Rewind, based on the Build Log
+// ***** Build / Test OK for Previous Commit: nuttx @ be40c01ddd6f43a527abeae31042ba7978aabb58 / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
+// ***** BUILD / TEST FAILED FOR NEXT COMMIT: nuttx @ 48846954d8506e1c95089a8654787fdc42cc098c / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
+async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
+    let mut nuttx_hash_prev: Option<String> = None;
+    let mut apps_hash_prev: Option<String> = None;
+    let mut build_score_prev: Option<f32> = None;
+    let mut nuttx_hash_next: Option<String> = None;
+    let mut apps_hash_next: Option<String> = None;
+    let mut build_score_next: Option<f32> = None;
+    for line in lines {
+        if !line.starts_with("*****") { continue; }
+        println!("line={line}");
+
+        // Search for: "build / test failed" vs "build / test ok"
+        // If Failed: build_score=0
+        // If Successful: build_score=1
+        let line = line.to_lowercase();
+        let build_score =
+            if line.contains("test fail") { 0.0 }
+            else if line.contains("test ok") { 1.0 }
+            else { println!("*** Unknown Build Score: {line}"); sleep(Duration::from_secs(1)); continue; };
+
+        // Extract nuttx hash and apps hash
+        let nuttx_hash: Option<String>;
+        let apps_hash: Option<String>;
+        let re = Regex::new("nuttx @ ([0-9a-z]+) / nuttx-apps @ ([0-9a-z]+)").unwrap();
+        let caps = re.captures(&line);
+        if let Some(caps) = caps {
+            let nuttx = caps.get(1).unwrap().as_str();
+            let apps = caps.get(2).unwrap().as_str();
+            nuttx_hash = Some(nuttx.into());  // "7f84a64109f94787d92c2f44465e43fde6f3d28f"
+            apps_hash = Some(apps.into());  // "d6edbd0cec72cb44ceb9d0f5b932cbd7a2b96288"
+        } else { println!("*** Missing Git Hash: {line}"); continue; }
+
+        // Search for: "previous commit" vs "next commit"
+        if line.contains("previous commit") {
+            (nuttx_hash_prev, apps_hash_prev, build_score_prev) = (nuttx_hash, apps_hash, Some(build_score)); 
+        } else if line.contains("next commit") {
+            (nuttx_hash_next, apps_hash_next, build_score_next) = (nuttx_hash, apps_hash, Some(build_score)); 
+        }
+    }
+    println!("{:?}", (&nuttx_hash_prev, &apps_hash_prev, &build_score_prev, &nuttx_hash_next, &apps_hash_next, &build_score_next));
+    Ok((nuttx_hash_prev, apps_hash_prev, build_score_prev, nuttx_hash_next, apps_hash_next, build_score_next))
+}
+
+// Fields for Build Rewind
+type RewindFields = (
+    Option<String>,  // nuttx_hash_prev
+    Option<String>,  // apps_hash_prev
+    Option<f32>,     // build_score_prev
+    Option<String>,  // nuttx_hash_next
+    Option<String>,  // apps_hash_next
+    Option<f32>,     // build_score_next
+);
 
 // Given a list of all defconfig pathnames, search for a target (like "ox64:nsh")
 // and return the Sub-Architecture (like "bl808")
