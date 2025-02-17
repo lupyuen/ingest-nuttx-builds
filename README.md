@@ -1,14 +1,18 @@
-![Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway](https://lupyuen.github.io/images/ci4-flow.jpg)
+![Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway](https://lupyuen.org/images/ci4-flow.jpg)
 
 # Ingest Build Logs from Apache NuttX RTOS into Prometheus Pushgateway
 
 Read the articles...
 
-- ["Continuous Integration Dashboard for Apache NuttX RTOS (Prometheus and Grafana)"](https://lupyuen.github.io/articles/ci4)
+- ["Continuous Integration Dashboard for Apache NuttX RTOS (Prometheus and Grafana)"](https://lupyuen.org/articles/ci4.html)
 
-- ["Optimising the Continuous Integration for Apache NuttX RTOS (GitHub Actions)"](https://lupyuen.codeberg.page/articles/ci3.html)
+- ["Optimising the Continuous Integration for Apache NuttX RTOS (GitHub Actions)"](https://lupyuen.org/articles/ci3.html)
 
-- ["Your very own Build Farm for Apache NuttX RTOS"](https://lupyuen.codeberg.page/articles/ci2.html)
+- ["Your very own Build Farm for Apache NuttX RTOS"](https://lupyuen.org/articles/ci2.html)
+
+- ["Rewinding a Build" for Apache NuttX RTOS (Docker)"](https://lupyuen.org/articles/ci6.html)
+
+- ["Auto-Rewind for Daily Test (Apache NuttX RTOS)"](https://lupyuen.org/articles/rewind.html)
 
 To ingest NuttX Build Logs into Prometheus Pushgateway: [run.sh](run.sh)
 
@@ -52,6 +56,10 @@ cargo run -- \
 [(See the __Ingest Log for GitHub Gists__)](https://gist.github.com/lupyuen/7da9c95b3efe39ff818772775c90da96)
 
 [(See the __Ingest Log for GitHub Actions__)](https://gist.github.com/lupyuen/1c0c3ff584d083d59d4b2190ecee3f99)
+
+![Continuous Integration Dashboard](https://lupyuen.org/images/ci4-dashboard.png)
+
+# Continuous Integration Dashboard
 
 To install Grafana and Prometheus...
 
