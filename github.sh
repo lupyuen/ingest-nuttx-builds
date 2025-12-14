@@ -11,13 +11,13 @@ set -x  #  Echo commands
 run_id=$1  ## Optional: First Parameter is Run ID
 user=NuttX
 repo=nuttx
-linux_step=7  ## TODO: Step may change for Linux Builds
+linux_step=10 ## TODO: Step may change for Linux Builds
 msys2_step=9  ## TODO: Step may change for msys2 Builds
 
 function ingest_log {
   ## Fetch the Jobs for the Run ID. Get the Job ID for the Job Name.
   local os=$1 ## "Linux" or "msys2"
-  local step=$2 ## "7" or "9"
+  local step=$2 ## "10" or "9"
   local group=$3 ## "arm-01"
   local job_name="$os ($group)"
   local job_id=$(
@@ -43,6 +43,7 @@ function ingest_log {
   ## filename looks like ci-arm-01.log
   ## pathname looks like /tmp/ingest-nuttx-builds/ci-arm-01.log
   ## url looks like https://github.com/NuttX/nuttx/actions/runs/11603561928/job/32310817851#step:7:83
+  ## Update: "step:7" has become "step:10"
   local log_file=$(ls $tmp_path/*$os\ \($group\)*.txt)
   local filename="ci-$group.log"
   local pathname="$tmp_path/$filename"
