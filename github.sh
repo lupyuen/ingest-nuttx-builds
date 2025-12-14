@@ -38,12 +38,12 @@ function ingest_log {
   fi
   sleep 1
 
-  ## log_file looks like /tmp/ingest-nuttx-builds/Linux (arm-01)/7_Run builds.txt
-  ## Or /tmp/ingest-nuttx-builds/msys2 (msys2)/9_Run Builds.txt
+  ## log_file looks like /tmp/ingest-nuttx-builds/33_Linux (arm-01).txt
+  ## Or /tmp/ingest-nuttx-builds/6_msys2 (msys2).txt
   ## filename looks like ci-arm-01.log
   ## pathname looks like /tmp/ingest-nuttx-builds/ci-arm-01.log
   ## url looks like https://github.com/NuttX/nuttx/actions/runs/11603561928/job/32310817851#step:7:83
-  local log_file="$tmp_path/$os ($group)/${step}_Run builds.txt"
+  local log_file=$(ls $tmp_path/*$os\ \($group\)*.txt)
   local filename="ci-$group.log"
   local pathname="$tmp_path/$filename"
 
