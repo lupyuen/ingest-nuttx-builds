@@ -67,13 +67,18 @@
                 },
                 "1": {
                   "color": "green",
-                  "index": 2,
+                  "index": 3,
                   "text": "OK"
                 },
                 "0.5": {
                   "color": "transparent",
                   "index": 1,
                   "text": "Warning"
+                },
+                "0.8": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "OK"
                 }
               },
               "type": "value"
@@ -170,6 +175,30 @@
               {
                 "id": "custom.width",
                 "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Board"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 101
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp + timestamp_log"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 436
               }
             ]
           }
@@ -302,6 +331,29 @@
           }
         },
         {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Timestamp"
+                }
+              },
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "timestamp_log"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
           "id": "groupBy",
           "options": {
             "fields": {
@@ -336,6 +388,16 @@
                 "operation": "aggregate"
               },
               "Timestamp": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
+              },
+              "Timestamp + nuttx_hash": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Timestamp + timestamp_log": {
                 "aggregations": [],
                 "operation": "groupby"
               },
@@ -350,6 +412,12 @@
                   "first"
                 ],
                 "operation": "aggregate"
+              },
+              "timestamp_log": {
+                "aggregations": [
+                  "first"
+                ],
+                "operation": "aggregate"
               }
             }
           }
@@ -357,7 +425,10 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Timestamp + nuttx_hash": true,
+              "Timestamp + timestamp_log": true
+            },
             "includeByName": {},
             "indexByName": {
               "Board (first)": 2,
@@ -365,7 +436,8 @@
               "Config (first)": 3,
               "Message (first)": 6,
               "Severity (first)": 1,
-              "Timestamp": 0,
+              "Timestamp (first)": 0,
+              "Timestamp + nuttx_hash": 8,
               "apps_hash (first)": 5,
               "nuttx_hash (first)": 4
             },
@@ -380,8 +452,10 @@
               "Message (firstNotNull)": "Message",
               "Severity (first)": "Severity",
               "Severity (firstNotNull)": "Severity",
+              "Timestamp (first)": "Timestamp",
               "apps_hash (first)": "Apps Hash",
-              "nuttx_hash (first)": "NuttX Hash"
+              "nuttx_hash (first)": "NuttX Hash",
+              "timestamp_log (first)": "Log Timestamp"
             }
           }
         }
@@ -527,6 +601,6 @@
   "timezone": "browser",
   "title": "NuttX Build History",
   "uid": "fe2q876wubc3kc",
-  "version": 22,
+  "version": 30,
   "weekStart": ""
 }
