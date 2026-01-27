@@ -161,7 +161,9 @@ for (( ; ; )); do
   rm -rf $tmp_path
   mkdir $tmp_path
   pushd $tmp_path
+  set +e  #  Ignore unzip warnings: "warning:  stripped absolute path spec from /system.txt"
   unzip /tmp/run-log.zip
+  set -e  #  Exit when any command fails
   popd
 
   ## For All Target Groups
