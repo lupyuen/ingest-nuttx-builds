@@ -275,6 +275,17 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
         .file_name().unwrap()
         .to_str().unwrap();
     let log = fs::read_to_string(&args.file).unwrap();
+
+    // Look for "##[group]Run ./sources/nuttx/.github/actions/ci-container" and truncate everything before
+    // Same for "##[group]Run echo "::add-matcher::sources/nuttx/.github/gcc.json""
+    let log_split = &log.split("##[group]Run ./sources/nuttx/.github/actions/ci-container")
+        .collect::<Vec<_>>();
+    let log = log_split.last().unwrap();
+    let log_split = &log.split("##[group]Run echo \"::add-matcher::sources/nuttx/.github/gcc.json\"")
+        .collect::<Vec<_>>();
+    let log = log_split.last().unwrap();
+
+    // Process the truncated Log File
     process_log(
         &log, None, &args.user, &args.defconfig, &args.group, "", filename,
         Some(&args.nuttx_hash), Some(&args.apps_hash),
