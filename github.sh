@@ -179,7 +179,7 @@ for (( ; ; )); do
     risc-v-05 risc-v-06 \
     sim-01 sim-02 sim-03 \
     x86_64-01 \
-    xtensa-01 xtensa-02 \
+    xtensa-00 xtensa-01 xtensa-02 xtensa-03 \
     msys2
   do
     ## Ingest the Log File
