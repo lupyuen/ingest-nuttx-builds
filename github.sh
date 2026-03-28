@@ -11,7 +11,7 @@ set -x  #  Echo commands
 run_id=$1  ## Optional: First Parameter is Run ID
 user=NuttX
 repo=nuttx
-linux_step=11 ## TODO: Step may change for Linux Builds
+linux_step=10 ## TODO: Step may change for Linux Builds
 msys2_step=9  ## TODO: Step may change for msys2 Builds
 
 function ingest_log {
