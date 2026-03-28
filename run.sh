@@ -11,17 +11,6 @@ for (( ; ; )); do
   ## Find all defconfig files
   find $HOME/riscv/nuttx -name defconfig >/tmp/defconfig.txt
 
-  ## Ingest logs from nuttxmacos2/nuttx-build-log GitLab Snippets. Remove special characters.
-  ## gitlab-token.sh contains "export GITHUB_TOKEN=...", any GitLab Token with read access will do.
-  set +x ; . $HOME/gitlab-token.sh ; set -x
-  cargo run -- \
-    --user nuttxmacos2 \
-    --repo nuttx-build-log \
-    --defconfig /tmp/defconfig.txt \
-    | tr -d '\033\007'
-  unset GITLAB_TOKEN
-  date ; sleep 300
-
   ## Ingest logs from lupyuen/nuttx-build-log GitLab Snippets. Remove special characters.
   ## gitlab-token.sh contains "export GITHUB_TOKEN=...", any GitLab Token with read access will do.
   set +x ; . $HOME/gitlab-token.sh ; set -x
@@ -31,20 +20,6 @@ for (( ; ; )); do
     --defconfig /tmp/defconfig.txt \
     | tr -d '\033\007'
   unset GITLAB_TOKEN
-  date ; sleep 300
-
-  ## Ingest logs from lvanasse GitHub Gist. Remove special characters.
-  cargo run -- \
-    --user lvanasse \
-    --defconfig /tmp/defconfig.txt \
-    | tr -d '\033\007'
-  date ; sleep 300
-
-  ## Ingest logs from jerpelea GitHub Gist. Remove special characters.
-  cargo run -- \
-    --user jerpelea \
-    --defconfig /tmp/defconfig.txt \
-    | tr -d '\033\007'
   date ; sleep 300
 
   ## Ingest logs from nuttxpr GitHub Gist. Remove special characters.
