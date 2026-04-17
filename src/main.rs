@@ -56,13 +56,14 @@ struct Args {
 }
 
 #[tokio::main]
+#[allow(clippy::regex_creation_in_loops)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Init the Logger and Command-Line Args
     env_logger::init();
     let args = Args::parse();
 
     // If Log File is specified: Process the Log File
-    if args.file != "" {
+    if !args.file.is_empty() {
         process_file(&args).await?;
         return Ok(());
     }
@@ -171,6 +172,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 /// Process the GitLab Snippets
 /// https://docs.gitlab.com/ee/api/snippets.html
+#[allow(clippy::regex_creation_in_loops)]
 async fn process_snippets(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     let token = std::env::var("GITLAB_TOKEN")
         .expect("GITLAB_TOKEN env variable is required");
@@ -274,7 +276,8 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     let filename = Path::new(&args.file)
         .file_name().unwrap()
         .to_str().unwrap();
-    let log = fs::read_to_string(&args.file).unwrap();
+    let log = fs::read_to_string(&args.file).unwrap()
+        .replace("\r\n", "\n");
 
     // Look for "##[endgroup]\n##[group]Run ./sources/nuttx/.github/actions/ci-container" and truncate everything before
     // Same for "##[group]Run echo "::add-matcher::sources/nuttx/.github/gcc.json""
@@ -287,7 +290,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
 
     // Process the truncated Log File
     process_log(
-        &log, None, &args.user, &args.defconfig, &args.group, "", filename,
+        log, None, &args.user, &args.defconfig, &args.group, "", filename,
         Some(&args.nuttx_hash), Some(&args.apps_hash),
         Some(&args.repo), Some(&args.run_id), Some(&args.job_id), Some(&args.step)
     ).await?;
@@ -306,6 +309,7 @@ async fn process_file(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
 /// ====================================================================================
+#[allow(clippy::too_many_arguments)]
 async fn process_log(
     log: &str,  // Content of Build Log
     timestamp_log: Option<&str>,  // Timestamp of Build Log: "2025-01-27T07:42:32.099Z"
@@ -336,7 +340,7 @@ async fn process_log(
         if group == "unknown" { extract_rewind_fields(lines).await? }
         else { (None, None, None, None, None, None) };
 
-    for (linenum, line) in lines.into_iter().enumerate() {
+    for (linenum, line) in lines.iter().enumerate() {
         // Not a delimiter: ====== test session starts
         if line.starts_with(DELIMITER) && !line.contains(" ") {
             // Process the target
@@ -358,10 +362,10 @@ async fn process_log(
         // macOS Logs use Local Time, not UTC. We convert Local Time to UTC.
         // To get the UTC Time Difference:
         // Search for "utc_time=2024-11-09T03:51:42" and "local_time=2024-11-09T11:51:42"
-        } else if line.starts_with("utc_time=") {
-            utc_time = Some(&line[9..]);
-        } else if line.starts_with("local_time=") {
-            local_time = Some(&line[11..]); 
+        } else if let Some(stripped) = line.strip_prefix("utc_time=") {
+            utc_time = Some(stripped);
+        } else if let Some(stripped) = line.strip_prefix("local_time=") {
+            local_time = Some(stripped); 
         }
     }
     Ok(())
@@ -377,6 +381,8 @@ async fn process_log(
 ///   Enabling CONFIG_ARM_TOOLCHAIN_GNU_EABI
 ///   Building NuttX...
 ///   Normalize freedom-kl25z/nsh
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::regex_creation_in_loops)]
 async fn process_target(
     lines: &[&str],  // Content of Build Log
     timestamp_log: Option<&str>,  // Timestamp of Build Log: "2025-01-27T07:42:32.099Z"
@@ -447,7 +453,7 @@ async fn process_target(
     let lines = &lines[l..];
     for line in lines {
         let line = line.trim();
-        if line.len() == 0 ||
+        if line.is_empty() ||
             line.starts_with("----------") ||
             line.starts_with("-- ") ||  // "-- Build type:"
             line.starts_with("Cleaning") ||
@@ -458,8 +464,11 @@ async fn process_target(
             line.starts_with("Building") ||
             line.starts_with("Normalize") ||
             line.starts_with("[1/1] Normalize") ||  // "[1/1] Normalize linum-stm32h753bi/nsh"
-            line.starts_with("% Total") ||
+            line.replace(" ", "").starts_with("%Tota") ||  // "% Tot al      % Re ceived % Xferd  Average Speed   Time    Time     Time  Current"
+            line.contains("TToott") ||  // "%%  TToottaall        % %R eRceecieveidv e%d  X%f eXrfde r Adv e rAavgeer aSgpee eSdp e  eTdi m e  T i m eT i m e  T i  m eT i m e    TCiumrer e nCtu \n r r e n t \n -:- \n - : -0-   -  - :0- - : - -0  -  - : -0- :- -   0        0 0      0      0 --:--:-- --:--:-- --:--:--     0"
+            line.contains("-:--:-") ||  // "- --:--:-- --:--:--  817k"
             line.starts_with("Dload") ||
+            (line.contains("Dload") && line.contains("Upload") && line.contains("Total")) ||  // "-:--:--     0               Dload  Upload   Total   Spent    Left  Speed"
             line.starts_with("~/apps") ||
             line.starts_with("~/nuttx") ||
             line.starts_with("find: 'boards/") ||  // "find: 'boards/risc-v/q[0-d]*': No such file or directory"
@@ -474,6 +483,8 @@ async fn process_target(
             line.contains("git add <file>") ||  // "(use "git add <file>..." to update what will be committed)"
             line.contains("git restore <file>") ||  // "(use "git restore <file>..." to discard changes in working directory)"
             line.contains("***** BUILD FAILED") ||  // "***** BUILD FAILED"
+            line.starts_with("Removing ") ||  // "Removing libs/libbuiltin/bin/"
+            line.starts_with("nothing to commit") ||  // "nothing to commit, working tree clean"
             line.starts_with("set +") ||  // "set +e"
             line.starts_with("set -") ||  // "set -e"
             line.starts_with("+ set +") ||  // "+ set +e"
@@ -489,7 +500,131 @@ async fn process_target(
             line.starts_with("CPP:  ") ||  // "CPP:  etc/init.d/rc.sysinit"
             line.starts_with("HEAD is now at") ||  // "HEAD is now at 7aa2dc24cd tools/gdb: fix checkpatch warning"
             line.starts_with("CP: ") ||  // "CP: arch/dummy/Kconfig to /tmp/build-test-knsh64/nuttx/arch/dummy/dummy_kconfig"
-            line.starts_with("LN: ") // "LN: platform/board to /tmp/build-test-knsh64/apps/platform/dummy"
+            line.starts_with("LN: ") ||  // "LN: platform/board to /tmp/build-test-knsh64/apps/platform/dummy"
+            // Added for parse-nuttx-builds
+            line.starts_with("Build Attempt 1") ||  // "Build Attempt 1 of 8"
+            line.starts_with("HEAD detached at") ||  // "HEAD detached at pull/18396/merge"
+            line.starts_with("modified:") ||  // "modified:   boards/sim/sim/sim/configs/login/defconfig"
+            line.starts_with("no changes added to commit") ||  // "no changes added to commit (use \"git add\" and/or \"git commit -a\")"
+            line.contains("records in") ||  // "508+0 records in"
+            line.contains("records out") ||  // "508+0 records out"
+            line.contains("bytes copied") ||  // "508 bytes copied, 0.00110255 s, 461 kB/s"
+            (line.contains("bytes (") && line.contains("copied")) ||  // "2048 bytes (2.0 kB, 2.0 KiB) copied, 4.7753e-05 s, 42.9 MB/s"
+            line.starts_with("mkdir: cannot create directory '/github/workspace/sources/nuttx/arch") ||  // "mkdir: cannot create directory '/github/workspace/sources/nuttx/arch/xtensa/src/esp32s2/ulp': File exists"
+            line.starts_with("TOOLS_DIR path is") ||  // "TOOLS_DIR path is \"/github/workspace/sources/nuttx\""
+            line.starts_with("HOST =") ||  // "HOST = Linux"
+            line.starts_with("MK: Notice: No header files found in /github/workspace/sources/nuttx/arch") ||  // "MK: Notice: No header files found in /github/workspace/sources/nuttx/arch/arm64/src"
+            line.starts_with("/github/workspace/sources/apps /github/workspace/sources/nuttx") ||  // "/github/workspace/sources/apps /github/workspace/sources/nuttx"
+            line.starts_with("/github/workspace/sources/nuttx") ||  // "/github/workspace/sources/nuttx"
+            line.starts_with("/usr/bin/bash: line 1: arm-nuttx-elf-gcc: command not found") ||  // "/usr/bin/bash: line 1: arm-nuttx-elf-gcc: command not found"
+            line.starts_with("/usr/bin/bash: line 1: arm-nuttx-eabi-gcc: command not found") ||  // "/usr/bin/bash: line 1: arm-nuttx-eabi-gcc: command not found \n /usr/bin/bash: line 1: arm-nuttx-eabi-gcc: command not found"
+            line.starts_with("arm-none-eabi-ld: warning: /github/workspace/sources") ||  // "arm-none-eabi-ld: warning: /github/workspace/sources/apps/bin/errno has a LOAD segment with RWX permissions"
+            line.starts_with("aarch64-none-elf-ld: warning: nuttx_user has a LOAD segment with RWX permissions") ||  // "aarch64-none-elf-ld: warning: nuttx_user has a LOAD segment with RWX permissions"
+            line.starts_with("riscv-none-elf-ld: warning: /github/workspace/sources") ||  // "riscv-none-elf-ld: warning: /github/workspace/sources/nuttx/nuttx has a LOAD segment with RWX permissions"
+            line.starts_with("/tools/xtensa-esp-elf-gcc/bin/xtensa-esp-elf-ld: warning: /github/workspace/sources/nuttx/nuttx has a LOAD segment with RWX permissions") ||  // "/tools/xtensa-esp-elf-gcc/bin/xtensa-esp-elf-ld: warning: /github/workspace/sources/nuttx/nuttx has a LOAD segment with RWX permissions"
+            line.starts_with("/tools/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/13.2.1/../../../../arm-none-eabi/bin/ld: warning: /github/workspace/sources/nuttx/nuttx has a LOAD segment with RWX permissions") ||  // "/tools/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/13.2.1/../../../../arm-none-eabi/bin/ld: warning: /github/workspace/sources/nuttx/nuttx has a LOAD segment with RWX permissions"
+            (line.starts_with("riscv-none-elf-strip") && line.contains("adjusted to")) ||  // "riscv-none-elf-strip: /github/workspace/sources/apps/bin/stO9cKyM: section .fini_array lma 0xc0101009 adjusted to 0xc010100c \n riscv-none-elf-strip: /github/workspace/sources/apps/bin/stlUMDKA: section .fini_array lma 0xc0101279 adjusted to 0xc010127c \n riscv-none-elf-strip: /github/workspace/sources/apps/bin/stqCsC2h: section .fini_array lma 0xc0101279 adjusted to 0xc010127c"
+            (line.starts_with("arm-none-eabi-objcopy") && line.contains("adjusted to")) ||  // "arm-none-eabi-objcopy: /github/workspace/sources/nuttx/stbSLcmg: section .bss lma 0x66d7e0 adjusted to 0x6707e0 \n arm-none-eabi-objcopy: /github/workspace/sources/nuttx/nuttx: warning: empty loadable segment detected at vaddr=0x40200000, is this intentional?"
+            (line.starts_with("arm-none-eabi-objcopy") && line.contains("empty loadable segment")) ||  // "arm-none-eabi-objcopy: /github/workspace/sources/nuttx/nuttx: warning: empty loadable segment detected at vaddr=0x40200000, is this intentional?"
+            line.starts_with("lto-wrapper: warning: Extra option to '-Xassembler'") ||  // "lto-wrapper: warning: Extra option to '-Xassembler': -mthumb, dropping all '-Xassembler' and '-Wa' options."
+            line.starts_with("lto-wrapper: warning: using serial compilation") ||  // "lto-wrapper: warning: using serial compilation of 2 LTRANS jobs"
+            line.starts_with("lto-wrapper: note: see the '-flto'") ||  // "lto-wrapper: note: see the '-flto' option documentation for more information"
+            line.starts_with("sparc-gaisler-elf-gcc: warning: gnu-elf.ld.in: linker input file unused because linking not done") ||  // "sparc-gaisler-elf-gcc: warning: gnu-elf.ld.in: linker input file unused because linking not done"
+            line.starts_with("/tools/xtensa-esp-elf-gcc/bin/xtensa-esp-elf-ld:/github/workspace/sources/nuttx/boards/xtensa/esp32/esp32-devkitc/../common/scripts/kernel-space.ld.tmp:250: warning: memory region `rtc_reserved_seg' not declared") ||  // "/tools/xtensa-esp-elf-gcc/bin/xtensa-esp-elf-ld:/github/workspace/sources/nuttx/boards/xtensa/esp32/esp32-devkitc/../common/scripts/kernel-space.ld.tmp:250: warning: memory region `rtc_reserved_seg' not declared"
+            line.contains("given more than once in the same rule") ||  // "Makefile:169: target 'arm_perf.o' given more than once in the same rule \n Makefile:169: target 'arm_perf.o' given more than once in the same rule \n Makefile:169: target 'arm_perf.o' given more than once in the same rule \n Makefile:169: target 'arm_perf.o' given more than once in the same rule \n Makefile:169: target 'arm_perf.o' given more than once in the same rule \n Makefile:169: target 'arm_perf.o' given more than once in the same rule"
+            line.starts_with("diff: args.gn") ||  // "diff: args.gn: No such file or directory"
+            line.starts_with("Note: skipping refresh") ||  // "Note: skipping refresh for debug defconfig."
+            line.starts_with("warning: failed to connect to jobserver from environment variable") ||  // "warning: failed to connect to jobserver from environment variable `MAKEFLAGS=\"ks -j4 --jobserver-auth=3,4 --no-print-directory -- APPDIR=/github/workspace/sources/apps EXTRAFLAGS=-Wno-cpp -Werror\"`: cannot open file descriptor 3 from the jobserver environment variable value: Bad file descriptor (os error 9) \n | \n = note: the build environment is likely misconfigured"
+            line.contains("build environment is likely misconfigured") ||  // "| \n = note: the build environment is likely misconfigured"
+            line == "|" ||  // "| \n = note: the build environment is likely misconfigured"
+            line.starts_with("+ '[' -d /github/workspace/sources/tools/ccache") ||  // "+ '[' -d /github/workspace/sources/tools/ccache ']' \n + ccache -s"
+            line.contains("WARNING: YOU ARE USING") ||  // ">>>> WARNING: YOU ARE USING THE DEFAULT ADMIN PASSWORD (CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD=\"Administrator\")!!! PLEASE CHANGE IT!!! <<<<"
+            // Begin USE_LEGACY_PINMAP
+            line.contains("USE_LEGACY_PINMAP will be deprecated") ||  // "44 | #  pragma message \"CONFIG_STM32_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py\"
+            line == "|           ^~~~~~~" ||  // "|           ^~~~~~~"
+            line == "|           ^" ||  // "|           ^"
+            line == "1 warning generated." ||  // "1 warning generated."
+            // End USE_LEGACY_PINMAP
+            // Begin sim:sqlite
+            line.starts_with("configure: WARNING: Can't find Tcl configuration") ||  // "configure: WARNING: Can't find Tcl configuration definitions"
+            line.starts_with("configure: WARNING: *** Without Tcl") ||  // "configure: WARNING: *** Without Tcl the regression tests cannot be executed ***"
+            line.starts_with("configure: WARNING: *** Consider using --with-tcl") ||  // "configure: WARNING: *** Consider using --with-tcl=... to define location of Tcl ***"
+            line.starts_with("make[4]: warning: -j0 forced in submake") ||  // "make[4]: warning: -j0 forced in submake: resetting jobserver mode."
+            line.starts_with("Turn off this advice") ||  // "Turn off this advice by setting config variable advice.detachedHead to false"
+            // End sim:sqlite
+            // Begin NTFC
+            line.starts_with("Running NuttX...") ||  // "Running NuttX..."
+            line.starts_with("++ pwd") ||  // "++ pwd"
+            line.starts_with("+ olddir=") ||  // "+ olddir=/github/workspace/sources/nuttx"
+            line.starts_with("+ nuttdir=") ||  // "+ nuttdir=/github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/../../../../../../ "
+            line.starts_with("+ cd ") ||  // "+ cd /github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/../../../../../../ "
+            line.starts_with("+ confpath=") ||  // "+ confpath=/github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/config.yaml"
+            line.starts_with("+ jsonconf=") ||  // "+ jsonconf=/github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/session.json"
+            line.starts_with("+ testpath=") ||  // "+ testpath=/github/workspa"
+            line.starts_with("+ ntfc test") ||  // "+ ntfc test --testpath=/github/workspace/nuttx-ntfc/external/nuttx-testing --confpath=/github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/config.yaml --jsonconf=/github/workspace/sources/nuttx/boards/arm/imx6/sabre-6quad/configs/citest/session.json"
+            line.starts_with("CPU information header") ||  // "CPU information header not found in output"
+            line.starts_with("YAML config:") ||  // "YAML config:"
+            line.starts_with("{'config':") ||  // "{'config': {'cwd': './'},"
+            line.starts_with("'product':") ||  // "'product': {'cores': {'core0': {'conf_path': './.config',"
+            line.starts_with("'device':") ||  // "'device': 'qemu',"
+            line.starts_with("'elf_path':") ||  // "'elf_path': './nuttx',"
+            line.starts_with("'exec_args':") ||  // "'exec_args': '-semihosting -M sabrelit"
+            line.starts_with("'1024 -smp") ||  // "'1024 -smp 4 -nographic',"
+            line.starts_with("'exec_path':") ||  // "'exec_path': 'qemu-system-arm',"
+            line.starts_with("'name':") ||  // "'name': 'main'}},"
+            line.starts_with("JSON config:") ||  // "JSON config:"
+            line.starts_with("{'args':") ||  // "{'args': {'kv': []},"
+            line.starts_with("'module':") ||  // "'module': {'exclude_module': [], 'include_module': [], 'order': []}}"
+            line.starts_with("'-machine") ||  // "'-machine '"
+            line.starts_with("'virt") ||  // "'virt,virtualization=on,gic-version=3 '"
+            line.starts_with("'-net") ||  // "'-net none -chardev '"
+            line.starts_with("'stdio") ||  // "'stdio,id=con,mux=on -serial '"
+            line.starts_with("'chardev") ||  // "'chardev:con -mon '"
+            line.starts_with("'include_module':") ||  // "'include_module': [],"
+            line.starts_with("'order':") ||  // "'order': []}}"
+            line.contains("test session starts") ||  // "[1m============================= test session starts ==============================[0m"
+            line.starts_with("platform") ||  // "platform linux -- Python 3.10.12, pytest-9.0.2, pluggy-1.6.0"
+            line.starts_with("rootdir:") ||  // "rootdir: /github/workspace"
+            line.starts_with("plugins:") ||  // "plugins: timeout-2.4.0, dependency-0.6.1, repeat-0.9.1, ordering-0.6, json-0.4.0"
+            line.starts_with("timeout:") ||  // "timeout: 800.0s"
+            line.starts_with("timeout method:") ||  // "timeout method: signal"
+            line.starts_with("timeout func_only:") ||  // "timeout func_only: False"
+            line.starts_with("session timeout:") ||  // "session timeout: 3600.0s"
+            line.starts_with("collected") ||  // "collected 932 items"
+            line.starts_with("../../nuttx-ntfc/external/nuttx-testing") ||  // "../../nuttx-ntfc/external/nuttx-testing/arch/os/integration/test_arch_os_integration.py::test_os [32mPASSED[0m[32m [  1%][0m"
+            (line.contains("[32m======") && line.contains("passed") && line.contains("skipped")) ||  // "[32m================== [32m[1m72 passed[0m, [33m7 skipped[0m[32m in 653.76s (0:10:53)[0m[32m ===================[0m"
+            line.starts_with("+ ret=") ||  // "+ ret=0"
+            line == "0" ||  // "0"
+            line.starts_with("+ echo") ||  // "+ echo 0"
+            line.starts_with("+ artifacts=") ||  // "+ artifacts=/github/workspace/nuttx-ntfc/external/buildartifacts/sabre-6quad/citest//ntfc"
+            line.starts_with("+ mkdir") ||  // "+ mkdir -p /github/workspace/nuttx-ntfc/external/buildartifacts/sabre-6quad/citest//ntfc"
+            line.starts_with("+ rm") ||  // "+ rm -f pytest.debug.log"
+            line.starts_with("+ mv") ||  // "+ mv result /github/workspace/nuttx-ntfc/external/buildartifacts/sabre-6quad/citest//ntfc"
+            line.starts_with("+ exit") ||  // "+ exit 0"
+            line.starts_with("+ dd") ||  // "+ dd if=/dev/zero of=fatfs.img bs=512 count=128K"
+            line.starts_with("+ mkfs") ||  // "+ mkfs.fat fatfs.img"
+            line.starts_with("+ chmod") ||  // "+ chmod 777 ./fatfs.img"
+            line.starts_with("'-smp") ||  // "'-smp 1 -bios none -nographic '"
+            line.starts_with("'-drive") ||  // "'-drive '"
+            line.starts_with("'index=") ||  // "'index=0,id=userdata,if=none,format=raw,file=./fatfs.img '"
+            line.starts_with("'-device") ||  // "'-device '"
+            line.starts_with("+ source /github/workspace/nuttx-ntfc") ||  // "+ source /github/workspace/nuttx-ntfc/venv/bin/activate"
+            line.starts_with("+ deactivate") ||  // "+ deactivate"
+            line.starts_with("'4 -machine") ||  // "'4 -machine '"
+            line.starts_with("++ deactivate nondestructive") ||  // "++ deactivate nondestructive \n ++ '[' -n '' ']' \n ++ '[' -n '' ']' \n ++ '[' -n /usr/bin/bash -o -n '' ']' \n ++ hash -r \n ++ '[' -n '' ']' \n ++ unset VIRTUAL_ENV \n ++ unset VIRTUAL_ENV_PROMPT \n ++ '[' '!' nondestructive = nondestructive ']' \n ++ VIRTUAL_ENV=/github/workspace/nuttx-ntfc/venv \n ++ export VIRTUAL_ENV \n ++ _OLD_VIRTUAL_PATH=/tools/ccache/bin:/tools/gn:/tools/picotool:/tools/wamr:/tools/xtensa-esp-elf-gcc/bin:/tools/sparc-gaisler-elf-gcc/bin:/tools/riscv-none-elf-gcc/bin:/tools/renesas"
+            line.starts_with("+ ccache -s") ||  // "+ ccache -s"
+            // End NTFC
+            // Begin qemu-armv8a:xedge_demo
+            line.starts_with("Note: switching to") ||  // "Note: switching to '227a4b998300fa4cfde871dc7dac92c09e1636c2'."
+            line.starts_with("You are in") ||  // "You are in 'detached HEAD' state. You can look around, make experimental"
+            line.starts_with("changes and commit them") ||  // "changes and commit them, and you can discard any commits you make in this"
+            line.starts_with("state without impacting") ||  // "state without impacting any branches by switching back to a branch."
+            line.starts_with("If you want to") ||  // "If you want to create a new branch to retain commits you create, you may"
+            line.starts_with("do so (now or later)") ||  // "do so (now or later) by using -c with the switch command. Example:"
+            line.starts_with("git switch") ||  // "git switch"
+            line.starts_with("Or undo this operation") ||  // "Or undo this operation with:"
+            // End qemu-armv8a:xedge_demo
+            false
         { continue; }
 
         // Skip Downloads: "100  533k    0  533k    0     0   541k      0 --:--:-- --:--:-- --:--:--  541k100 1646k    0 1646k    0     0  1573k      0 --:--:--  0:00:01 --:--:-- 17.8M"
@@ -535,11 +670,12 @@ async fn process_target(
     let config = target_split[1];
     let board_config = format!("/{board}/configs/{config}/defconfig");
     let contains_error = contains_error ||
-    (
-        msg_join.contains("modified:") &&
-        msg_join.contains("boards/") &&
-        msg_join.contains(board_config.as_str())
-    );
+        msg_join.contains("< CONFIG_") || // "24,26d23 \n < CONFIG_EXAMPLES_PWM_DEVPATH=\"/dev/pwm0\" \n < CONFIG_EXAMPLES_PWM_DUTYPCT=50 \n < CONFIG_EXAMPLES_PWM_DURATION=5 \n 33d29 \n < CONFIG_HT32F491X3_TMR3_CHANNEL=1 \n Saving the new configuration file"
+        (
+            msg_join.contains("modified:") &&
+            msg_join.contains("boards/") &&
+            msg_join.contains(board_config.as_str())
+        );
     if group == "unknown" && contains_error { println!("contains_error3: msg_join=\n{msg_join}"); }
 
     // Search for Warnings
@@ -593,16 +729,18 @@ async fn process_target(
         &msg,
         nuttx_hash_prev, apps_hash_prev, build_score_prev,
         nuttx_hash_next, apps_hash_next, build_score_next,
+        run_id, job_id, step
     ).await?;
     Ok(())
 }
 
-// Post the Target to Prometheus Pushgateway
-// cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/nuttxpr/instance/ox64:nsh
-// # TYPE build_score gauge
-// # HELP build_score 1.0 for successful build, 0.0 for failed build
-// build_score{ version=1, user="nuttxpr", group="risc-v-01", board="ox64", config="nsh", target="ox64:nsh", url="http://aaa", msg="warning: aaa" } 0.5
-// EOF
+/// Post the Target to Prometheus Pushgateway.
+/// cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/nuttxpr/instance/ox64:nsh
+/// # TYPE build_score gauge
+/// # HELP build_score 1.0 for successful build, 0.0 for failed build
+/// build_score{ version=1, user="nuttxpr", group="risc-v-01", board="ox64", config="nsh", target="ox64:nsh", url="http://aaa", msg="warning: aaa" } 0.5
+/// EOF
+#[allow(clippy::too_many_arguments)]
 async fn post_to_pushgateway(
     build_score: f32,
     timestamp: &str,
@@ -617,6 +755,7 @@ async fn post_to_pushgateway(
     msg: &Vec<&str>,
     nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
     nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
+    _run_id: Option<&str>, _job_id: Option<&str>, _step: Option<&str>
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Get the Board and Config
     let version = 3;
@@ -633,8 +772,7 @@ async fn post_to_pushgateway(
 
     // Join the messages
     let mut msg_join = msg
-        .join(" \\n ")
-        .replace("\"", "\\\"");
+        .join(" \\n ");
 
     // If messages contain CI Test "test_helloxx FAILED"
     // Then remove the non-failed messages
@@ -644,15 +782,25 @@ async fn post_to_pushgateway(
             .copied()
             .filter(|s| s.contains(" FAILED"))
             .collect::<Vec<_>>()
-            .join(" \\n ")
-            .replace("\"", "\\\"");                
+            .join(" \\n ");
     }
 
     // Truncate the message to fit into Prometheus
+    msg_join = sanitize_text(&msg_join);
     msg_join.truncate(512);
+
+    // Handle unknown error or warning
+    let msg_join =
+        if msg_join.is_empty() && build_score < 1.0 { "(Unknown)".into() }
+        else { msg_join };
+
+    // Wrap the message
     let msg_opt =
         if msg.is_empty() { "".into() }
         else { format!(", msg=\"{msg_join}\"") };
+    let _msg_opt_json =
+        if msg.is_empty() { "".into() }
+        else { format!(",\n\"msg\": \"{msg_join}\"") };
     let url_display =
         if msg.is_empty() { "".into() }
         else { url.replace("https://", "") };
@@ -675,14 +823,14 @@ async fn post_to_pushgateway(
         if user == "rewind" { format!("{target}@{}@{}", nuttx_hash.unwrap(), apps_hash.unwrap()) }
         else { target.to_string() };
     let prev_opt =
-        if build_score_prev.is_some() {
+        if let Some(build_score_prev) = build_score_prev {
             format!(r#", nuttx_hash_prev="{}", apps_hash_prev="{}", build_score_prev="{}""#, 
-                nuttx_hash_prev.clone().unwrap(), apps_hash_prev.clone().unwrap(), build_score_prev.unwrap())
+                nuttx_hash_prev.clone().unwrap(), apps_hash_prev.clone().unwrap(), build_score_prev)
         } else { "".into() };
     let next_opt =
-        if build_score_next.is_some() {
+        if let Some(build_score_next) = build_score_next {
             format!(r#", nuttx_hash_next="{}", apps_hash_next="{}", build_score_next="{}""#, 
-                nuttx_hash_next.clone().unwrap(), apps_hash_next.clone().unwrap(), build_score_next.unwrap())
+                nuttx_hash_next.clone().unwrap(), apps_hash_next.clone().unwrap(), build_score_next)
         } else { "".into() };
 
     // Get the Log Timestamp
@@ -716,6 +864,7 @@ build_score{{ version="{version}", timestamp="{timestamp}", timestamp_log="{time
 // Extract the fields for Build Rewind, based on the Build Log
 // ***** Build / Test OK for Previous Commit: nuttx @ be40c01ddd6f43a527abeae31042ba7978aabb58 / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
 // ***** BUILD / TEST FAILED FOR NEXT COMMIT: nuttx @ 48846954d8506e1c95089a8654787fdc42cc098c / nuttx-apps @ a6b9e718460a56722205c2a84a9b07b94ca664aa
+#[allow(clippy::regex_creation_in_loops)]
 async fn extract_rewind_fields(lines: &Vec<&str>) -> Result<RewindFields, Box<dyn std::error::Error>> {
     let mut nuttx_hash_prev: Option<String> = None;
     let mut apps_hash_prev: Option<String> = None;
@@ -791,4 +940,14 @@ async fn get_sub_arch(defconfig: &str, target: &str) -> Result<String, Box<dyn s
         }
     }
     Ok("unknown".into())
+}
+
+/// Escape any special characters in JSON string
+fn sanitize_text(s: &str) -> String {
+    s.replace("\\", "\\\\")
+    .replace("\\\\n", "\\n")
+    .replace("\"", "\\\"")
+    .replace("\x1b", "")
+    .trim()
+    .to_string()
 }
