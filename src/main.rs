@@ -340,19 +340,22 @@ async fn process_log(
         if group == "unknown" { extract_rewind_fields(lines).await? }
         else { (None, None, None, None, None, None) };
 
+    let mut prev_target: Option<String> = None;
     for (linenum, line) in lines.iter().enumerate() {
         // Not a delimiter: ====== test session starts
         if line.starts_with(DELIMITER) && !line.contains(" ") {
             // Process the target
             if let Some(l) = target_linenum {
                 let target = &lines[l..linenum];
-                process_target(
+                let found_target = process_target(
                     target, timestamp_log, user, defconfig, group, url, filename,
                     nuttx_hash, apps_hash, utc_time, local_time,
                     repo, run_id, job_id, step, l,
                     &nuttx_hash_prev, &apps_hash_prev, build_score_prev,
                     &nuttx_hash_next, &apps_hash_next, build_score_next,
+                    prev_target.as_deref(),
                 ).await?;
+                if !found_target.is_empty() { prev_target = Some(found_target.clone()); }
 
                 // For Build Rewind: Process only the First Target ("This Commit")
                 if group == "unknown" { break; }
@@ -402,7 +405,8 @@ async fn process_target(
     linenum: usize,  // Line Number of Build Log
     nuttx_hash_prev: &Option<String>, apps_hash_prev: &Option<String>, build_score_prev: Option<f32>,  // For Rewind Build: Hash and Build Score for Previous Commit
     nuttx_hash_next: &Option<String>, apps_hash_next: &Option<String>, build_score_next: Option<f32>,  // For Rewind Build: Hash and Build Score for Next Commit
-) -> Result<(), Box<dyn std::error::Error>> {
+    prev_target: Option<&str>,  // Previous Target Name like "freedom-kl25z:nsh"
+) -> Result<String, Box<dyn std::error::Error>> {  // Return Target Name like "freedom-kl25z:nsh"
     println!("lines[0]={}", lines[0]);
     println!("lines.last={}", lines.last().unwrap());
     let mut l = 0;
@@ -414,7 +418,7 @@ async fn process_target(
     let caps = re.captures(lines[l]);
     if caps.is_none() {
         println!("*** Not a target: {}", lines[l]);
-        return Ok(())
+        return Ok(String::new());
     }
     let target = caps.unwrap()
         .get(1).unwrap()
@@ -422,6 +426,15 @@ async fn process_target(
         .replace("/", ":");  // "freedom-kl25z:nsh"
     println!("target={target}");
     l += 1;
+
+    // Skip repeated targets, ignore the rebuilds.
+    // Otherwise Prometheus will overwrite the Error Result by an Unknown Result.
+    if let Some(prev_target) = prev_target {
+        if target == prev_target {
+            println!("*** Skipping repeated target: {target}");
+            return Ok(target);
+        }
+    }
 
     // Read the Timestamp
     let mut timestamp = lines[l]
@@ -731,7 +744,7 @@ async fn process_target(
         nuttx_hash_next, apps_hash_next, build_score_next,
         run_id, job_id, step
     ).await?;
-    Ok(())
+    Ok(target)
 }
 
 /// Post the Target to Prometheus Pushgateway.
